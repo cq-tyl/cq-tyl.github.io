@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+ <meta name="referrer" content="no-referrer"/>
+    
+    <title>10.稳定性优化 | TYL</title>
+    
+    
+        <meta name="keywords" content="10.稳定性优化" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一、如何提升App的稳定性 正确认识 121.稳定性是大问题，Crash是PO优先级2.稳定性可优化的面很广  稳定性纬度 1231.Crash纬度2.性能纬度3.业务高可用纬度  稳定性优化概述 1231.重在预防、监控必不可少2.思考更深一层、重视隐含信息3.长效保持需要科学流程  二、高Crash率的破解之道 Crash相关指标 12345678910111213141516171.UV、">
+<meta property="og:type" content="article">
+<meta property="og:title" content="10.稳定性优化">
+<meta property="og:url" content="https://cq_tyl.gitee.io/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/10.%E7%A8%B3%E5%AE%9A%E6%80%A7%E4%BC%98%E5%8C%96/index.html">
+<meta property="og:site_name" content="TYL">
+<meta property="og:description" content="一、如何提升App的稳定性 正确认识 121.稳定性是大问题，Crash是PO优先级2.稳定性可优化的面很广  稳定性纬度 1231.Crash纬度2.性能纬度3.业务高可用纬度  稳定性优化概述 1231.重在预防、监控必不可少2.思考更深一层、重视隐含信息3.长效保持需要科学流程  二、高Crash率的破解之道 Crash相关指标 12345678910111213141516171.UV、">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-09-21T02:20:36.592Z">
+<meta property="article:modified_time" content="2023-09-21T02:50:24.954Z">
+<meta property="article:author" content="cq_tyl">
+<meta name="twitter:card" content="summary">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="TYL" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/favicon.ico" />
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/open-sans/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+<script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+<script src="/libs/jquery/plugins/cookie/1.4.1/jquery.cookie.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<head></head>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">TYL</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/">首页</a>
+                
+                    <a class="main-nav-link" href="/about">我的简历</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"> </button><input type="hidden" name="sitesearch" value="https://cq_tyl.gitee.io"></form>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/">首页</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">我的简历</a></td>
+                
+                <td>
+                    
+    <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><input type="hidden" name="sitesearch" value="https://cq_tyl.gitee.io"></form>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap" id='categories'>
+        <h3 class="widget-title">
+            <span>categories</span>
+            &nbsp;
+            <a id='allExpand' href="#">
+                <i class="fa fa-angle-double-down fa-2x"></i>
+            </a>
+        </h3>
+        
+        
+        
+         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android Application
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            AndroidStudio插件
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/Alibaba-Java-Coding-Guidelines%EF%BC%88%E9%98%BF%E9%87%8C%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83%E6%A3%80%E6%B5%8B%EF%BC%89/">Alibaba-Java-Coding-Guidelines（阿里代码规范检测）</a></li>  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/Studio%E6%B1%89%E5%8C%96%E6%8F%92%E4%BB%B6/">Studio汉化插件</a></li>  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/%E7%BF%BB%E8%AF%91%E6%8F%92%E4%BB%B6Translation/">翻译插件Translation</a></li>  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/database-navigator%E6%9F%A5%E7%9C%8B%E6%95%B0%E6%8D%AE%E5%BA%93/">Database-Navigator查看数据库</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android兼容适配
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E8%99%9A%E6%8B%9F%E6%8C%89%E9%94%AE%E9%81%AE%E6%8C%A1%E5%B8%83%E5%B1%80-%E9%9A%90%E8%97%8F%E5%BA%95%E9%83%A8%E8%99%9A%E6%8B%9F%E6%8C%89%E9%94%AENavigation%E5%AE%9E%E7%8E%B0%E5%85%A8%E5%B1%8F/">虚拟按键遮挡布局-隐藏底部虚拟按键Navigation实现全屏</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E8%AE%BE%E7%BD%AEImageView%E5%9B%BE%E7%89%87%E6%97%B6,%E5%AE%BD%E5%BA%A6%E4%B8%BAmatch%E6%97%B6%E9%9C%80%E8%A6%81%E8%AE%BE%E7%BD%AEscaleType%E4%B8%BAfitXY/">设置ImageView图片时,宽度为match时需要设置scaleType为fitXY</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E9%80%82%E9%85%8D%E5%8D%8E%E4%B8%BA%E7%AD%89%E6%9C%89%E8%99%9A%E6%8B%9F%E6%8C%89%E9%94%AE%E7%9A%84%E5%B1%8F%E5%B9%95%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">适配华为等有虚拟按键的屏幕的解决方案</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E5%A4%9A%E4%B8%AAfragment%E9%87%8D%E5%8F%A0%E6%97%B6%EF%BC%8C%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6%E7%A9%BF%E9%80%8F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%88viewpager+fragment%EF%BC%89/">多个Fragment重叠时，点击事件穿透解决方法（viewpager+fragment）</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android动画
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/LayoutTransition%EF%BC%88%E9%80%9A%E7%94%A8%E9%9A%90%E8%97%8F%E6%98%BE%E7%A4%BA%E5%8A%A8%E7%94%BB%EF%BC%89/">LayoutTransition（通用隐藏显示动画）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E5%85%B1%E4%BA%AB%E5%85%83%E7%B4%A0%EF%BC%88Shared-Element%EF%BC%89/">共享元素（Shared-Element）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E5%90%AF%E5%8A%A8%E9%A1%B5%E7%BC%A9%E6%94%BE%E5%8A%A8%E7%94%BB/">启动页缩放动画</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E5%B8%A7%E5%8A%A8%E7%94%BB/">帧动画</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E8%A1%A5%E9%97%B4%E5%8A%A8%E7%94%BB/">补间动画</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E6%8F%AD%E9%9C%B2%E6%95%88%E6%9E%9C/">揭露效果</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android基础
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JAV%E7%BA%BF%E7%A8%8B%E6%B1%A0/">JAV线程池</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/TCP%E5%8D%8F%E8%AE%AE%EF%BC%88Socket%EF%BC%89/">TCP协议（Socket）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Notifaction/">Notifaction</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JAVA%E9%9B%86%E5%90%88/">JAVA集合</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-%E8%AE%A1%E6%97%B6%E5%99%A8%EF%BC%88Handle+Runable-%E5%8F%AF%E9%87%8D%E7%BD%AE%E6%97%B6%E9%97%B4%E5%8F%AF%E6%9A%82%E5%81%9C%EF%BC%89/">Android-计时器（Handle+Runable-可重置时间可暂停）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JAVA%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1/">JAVA多线程之间的通信</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JSON%E6%95%B0%E6%8D%AE%E8%A7%A3%E6%9E%90/">JSON数据解析</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Sevice%EF%BC%88%E6%9C%8D%E5%8A%A1%EF%BC%89/">Sevice（服务）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%EF%BC%88%E5%9F%BA%E7%A1%80%EF%BC%89/">类加载器（基础）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/new-Random()--%E7%94%9F%E6%88%90%E9%9A%8F%E6%9C%BA%E6%95%B0/">New-Random()--生成随机数</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/SharedPreferences%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">SharedPreferences数据存储</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-popwind/">Android-Popwind</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E5%90%8C%E6%AD%A5%E9%94%81Synchronized%E5%92%8CLock/">同步锁Synchronized和Lock</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android-ConstraintLayout-%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3/">Android-ConstraintLayout-使用详解</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/EditText%E7%84%A6%E7%82%B9%E5%8A%A8%E6%80%81%E6%8E%A7%E5%88%B6/">EditText焦点动态控制</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/StringBuffer%E5%92%8CStringBuilder/">StringBuffer和StringBuilder</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/ANR/">ANR</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-ImageView-scaleType%E7%9A%84%E5%B1%9E%E6%80%A7%E7%90%86%E8%A7%A3/">Android-ImageView-scaleType的属性理解</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/">Android事件分发</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6/">逻辑运算符</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android-%E5%80%92%E8%AE%A1%E6%97%B6/">Android-倒计时</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android%E4%B8%AD%E6%8E%A5%E5%8F%A3%E5%9B%9E%E8%B0%83-%E6%96%B9%E6%B3%95%E5%9B%9E%E8%B0%83/">Android中接口回调-方法回调</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-6-0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90/">Android-6-0动态权限</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android-M-%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E6%9D%83%E9%99%90%E8%AF%B7%E6%B1%82/">Android-M-最简单的权限请求</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Toast%EF%BC%88%E8%87%AA%E5%AE%9A%E4%B9%89Toast%EF%BC%89/">Toast（自定义Toast）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-6-0%E6%96%B0%E7%89%B9%E6%80%A7/">Android-6-0新特性</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1-AsyncTask/">异步任务-AsyncTask</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/AndroidManifest-xml/">AndroidManifest-Xml</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Java-Character-%E7%B1%BB%EF%BC%88%E5%8D%95%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B-%E5%AD%97%E6%AF%8D-%E6%95%B0%E5%AD%97-%E5%A4%A7%E5%B0%8F%E5%86%99%E5%88%A4%E6%96%AD%EF%BC%89/">Java-Character-类（单个字符串类型-字母-数字-大小写判断）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/BroadCastReceiver(%E5%B9%BF%E6%92%AD)/">BroadCastReceiver(广播)</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Iterator%E8%BF%AD%E4%BB%A3%E5%99%A8/">Iterator迭代器</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/UDP%E5%8D%8F%E8%AE%AE/">UDP协议</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Activity%E5%90%91Fragment%E4%BC%A0%E5%80%BC/">Activity向Fragment传值</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android%E5%AD%97%E9%97%B4%E8%B7%9D%E5%92%8C%E8%A1%8C%E9%97%B4%E8%B7%9D/">Android字间距和行间距</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android工具类
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9%E6%A1%8C%E9%9D%A2%E5%9B%BE%E6%A0%87%E5%8F%8A%E5%BA%94%E7%94%A8%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8%E5%90%8D%E7%A7%B0/">Android动态修改桌面图标及应用桌面应用名称</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%8F%91%E5%B8%83%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%93%E5%88%B0JitPack%E4%B8%8A/">Android发布自定义库到JitPack上</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/JAVA%E5%86%85%E5%AD%98%E5%88%92%E5%88%86/">JAVA内存划分</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-studio-mac-%E8%8E%B7%E5%8F%96MD5-SHA1-SHA256%E8%AF%81%E4%B9%A6%E6%8C%87%E7%BA%B9/">Android-Studio-Mac-获取MD5-SHA1-SHA256证书指纹</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-textview%E7%A9%BA%E6%A0%BC%E5%8D%A0%E4%BD%8D%E7%AC%A6%E4%BB%A5%E5%8F%8A%E4%B8%80%E4%BA%9B%E5%85%B6%E4%BB%96%E5%8D%A0%E4%BD%8D%E7%AC%A6%E6%B1%87%E6%80%BB/">Android-Textview空格占位符以及一些其他占位符汇总</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/github%E5%9B%BE%E7%89%87%E5%8A%A0%E8%BD%BD%E5%A4%B1%E8%B4%A5/">Github图片加载失败</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E5%88%A4%E6%96%AD%E6%9F%90%E4%B8%AAactivity%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E6%A0%88%E5%A0%86%E4%B8%AD/">判断某个Activity是否存在栈堆中</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Androd-%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF%E5%8A%A8/">Androd-开机自启动</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-%E5%9C%A8%E6%B2%A1%E6%9C%89usb%E8%BF%9E%E6%8E%A5%E7%BA%BF%E7%9A%84%E6%83%85%E5%86%B5%E4%B8%8B%E5%A6%82%E4%BD%95%E8%BF%9E%E6%8E%A5%E6%89%8B%E6%9C%BA%E8%AE%BE%E5%A4%87/">Android-在没有Usb连接线的情况下如何连接手机设备</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E4%BF%9D%E6%B4%BB/">Android保活</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%B0%86String%E5%88%86%E5%89%B2%E8%BD%AC%E5%8C%96%E4%B8%BAArrayList/">Android将String分割转化为ArrayList</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9B%E4%B8%AA%E6%96%B9%E5%90%91%E6%BB%9A%E5%8A%A8%E7%9A%84%E8%B7%91%E9%A9%AC%E7%81%AFMarqueeViewLibrary/">Android自定义四个方向滚动的跑马灯MarqueeViewLibrary</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E7%AC%AC%E4%B8%89%E6%96%B9%E5%B8%B8%E7%94%A8%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%E6%A3%80%E6%B5%8B/">Android第三方常用安全漏洞检测</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/EventBus/">EventBus</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Glide%E8%AE%BE%E7%BD%AE%E5%9C%86%E8%A7%92%E3%80%81%E5%9C%86%E5%BD%A2%E5%9B%BE%E7%89%87%EF%BC%88%E6%97%A0%E9%9C%80%E5%86%8D%E5%88%9B%E5%BB%BA%E5%B7%A5%E5%85%B7%E7%B1%BB%E4%BA%86%EF%BC%89/">Glide设置圆角、圆形图片（无需再创建工具类了）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/GreenDao/">GreenDao</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/RxJava-RxAndroid/">RxJava-RxAndroid</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Sentry-Android%E9%9B%86%E6%88%90-%E4%BD%BF%E7%94%A8-%E6%B7%B7%E6%B7%86/">Sentry-Android集成-使用-混淆</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Svn%E5%BF%BD%E7%95%A5Android%E9%A1%B9%E7%9B%AE%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6-%E6%96%87%E4%BB%B6%E5%A4%B9/">Svn忽略Android项目上传文件-文件夹</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-RadioButton-drawableTop%E5%9B%BE%E7%89%87%E5%8F%98%E5%9E%8B/">Android-RadioButton-drawableTop图片变型</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E6%9C%AC%E5%9C%B0%E6%97%A5%E5%8E%86%E6%8F%92%E5%85%A5%E4%BA%8B%E4%BB%B6/">Android-本地日历插入事件</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E8%8E%B7%E5%8F%96assets%E5%86%85%E7%9A%84%E6%96%87%E4%BB%B6%E8%BD%ACFile/">Android-获取assets内的文件转File</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E8%BD%AF%E9%94%AE%E7%9B%98%E5%B7%A5%E5%85%B7%E7%B1%BB/">Android-软键盘工具类</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E9%80%8F%E6%98%8E%E5%BA%A6%E6%95%B0%E5%80%BC%E8%AE%B0%E5%BD%95%E8%A1%A8/">Android-透明度数值记录表</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android%E6%98%8E%E8%BF%9B%E5%BA%B75-1%E7%9B%92%E5%AD%90%E5%AE%9A%E6%97%B6%E5%BC%80%E5%85%B3%E6%9C%BA/">Android明进康5-1盒子定时开关机</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android%E8%B0%83%E8%AF%95%E8%BE%93%E5%87%BAlog%E6%89%93%E5%8D%B0%E4%BF%A1%E6%81%AF%E5%88%B0%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6/">Android调试输出log打印信息到本地文件</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/app%E6%98%AF%E5%90%A6%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C-%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81/">App是否正在运行-运行状态</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E5%9C%A8%E7%BA%BF%E5%9B%BE%E7%89%87%E5%8E%BB%E5%BA%95%E5%B7%A5%E5%85%B7---%E5%B0%86%E7%BA%AF%E8%89%B2%E8%83%8C%E6%99%AF%E7%9A%84%E5%9B%BE%E7%89%87%E8%BD%AC%E6%8D%A2%E4%B8%BA%E8%83%8C%E6%99%AF%E9%80%8F%E6%98%8E%E7%9A%84%E5%9B%BE%E7%89%87/">在线图片去底工具---将纯色背景的图片转换为背景透明的图片</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9C%86%E5%BD%A2%E5%A4%B4%E5%83%8FCircleImageView%E7%9A%84%E4%BD%BF%E7%94%A8/">自定义圆形头像CircleImageView的使用</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-Gps-%E4%BD%8D%E7%BD%AE%E4%BF%A1%E6%81%AF%E5%BC%80%E5%85%B3%E6%A3%80%E6%B5%8B/">Android-Gps-位置信息开关检测</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-eclpse%E5%BF%AB%E6%8D%B7%E9%94%AE%E5%A4%A7%E5%85%A8/">Android-Eclpse快捷键大全</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/java-android-%E9%93%B6%E8%A1%8C%E5%8D%A1%E5%8F%B7%E6%9F%A5%E8%AF%A2%E9%93%B6%E8%A1%8C%E5%8D%A1%E7%B1%BB%E5%9E%8B%E5%8F%8A%E5%90%8D%E7%A7%B0/">Java-Android-银行卡号查询银行卡类型及名称</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-RecyclerView%E5%AE%9E%E7%8E%B0%E6%A8%AA%E5%90%91%E6%BB%91%E5%8A%A8%E7%BF%BB%E9%A1%B5/">Android-RecyclerView实现横向滑动翻页</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/VAPTCHA-ANDROID-SDK%E9%83%A8%E7%BD%B2%E6%96%87%E6%A1%A3/">VAPTCHA-ANDROID-SDK部署文档</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-Jenkins%E8%87%AA%E5%8A%A8%E6%89%93%E5%8C%85/">Android-Jenkins自动打包</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%88%A4%E6%96%ADUrl%E6%A0%BC%E5%BC%8F%E6%98%AF%E5%90%A6%E6%AD%A3%E7%A1%AE/">Android判断Url格式是否正确</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/marktext/">Marktext</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E8%87%AA%E5%88%B6-9%E5%9B%BE%E5%AE%9E%E7%8E%B0%E5%92%8C%E8%AE%BE%E8%AE%A1%E5%9B%BE%E4%B8%80%E8%87%B4%E7%9A%84%E9%98%B4%E5%BD%B1%E6%95%88%E6%9E%9C/">自制-9图实现和设计图一致的阴影效果</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-pcm%E8%BD%AC%E7%A0%81wav/">Android-Pcm转码wav</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E5%B1%8F%E5%B9%95%E7%9A%84%E6%97%8B%E8%BD%AC%E8%A7%92%E5%BA%A6/">Android-获取当前屏幕的旋转角度</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E4%BF%9D%E5%AD%98%E5%9B%BE%E7%89%87%E5%88%B0%E6%9C%AC%E5%9C%B0%E7%9B%B8%E5%86%8C%E5%B9%B6%E5%8F%8A%E6%97%B6%E6%9B%B4%E6%96%B0%E6%98%BE%E7%A4%BA/">Android-保存图片到本地相册并及时更新显示</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E5%A4%9A%E8%AF%AD%E8%A8%80%E5%88%87%E6%8D%A2/">Android-多语言切换</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/adb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">Adb常用命令</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/adb%E9%85%8D%E7%BD%AE/">Adb配置</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%20SildingMenu%EF%BC%88%E4%BE%A7%E6%BB%91%E8%8F%9C%E5%8D%95%EF%BC%89%E5%B8%B8%E7%94%A8%E5%B1%9E%E6%80%A7/">Android SildingMenu（侧滑菜单）常用属性</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%9B%BE%E7%89%87%E6%89%8B%E5%8A%BF%E6%8E%A7%E4%BB%B6/">Android图片手势控件</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/DeBug%E8%B0%83%E8%AF%95/">DeBug调试</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/EditText%E5%BC%B9%E5%87%BA%E9%94%AE%E7%9B%98%E6%97%B6%E6%BB%9A%E5%8A%A8%E5%88%B0%E7%95%8C%E9%9D%A2%E6%8C%87%E5%AE%9A%E4%BD%8D%E7%BD%AE/">EditText弹出键盘时滚动到界面指定位置</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E6%97%A0%E9%9A%9C%E7%A2%8D%E5%8D%87%E7%BA%A7/">无障碍升级</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E5%88%A4%E6%96%AD%E5%BD%93%E5%89%8D%E5%BA%94%E7%94%A8%E6%98%AF%E5%90%A6%E9%80%80%E5%88%B0%E5%90%8E%E5%8F%B0/">判断当前应用是否退到后台</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android日常记录
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Activity%E7%9A%84%E5%9B%9B%E7%A7%8D%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F/">Activity的四种启动模式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android-Elevation/">Android-Elevation</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android-%E6%A0%B9%E6%8D%AE%E9%80%97%E5%8F%B7%E5%88%86%E9%9A%94String/">Android-根据逗号分隔String</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">Android内存管理</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android%E5%B8%B8%E7%94%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">Android常用设计模式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android%E8%87%AA%E5%AE%9A%E4%B9%89View/">Android自定义View</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Anroid-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F/">Anroid-自定义字体样式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/EditText%E4%B8%8D%E8%87%AA%E5%8A%A8%E8%8E%B7%E5%8F%96%E7%84%A6%E7%82%B9/">EditText不自动获取焦点</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/GlidePalette%E8%8E%B7%E5%8F%96%E5%9B%BE%E7%89%87%E8%83%8C%E6%99%AF%E8%89%B2/">GlidePalette获取图片背景色</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Handler/">Handler</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%AE%89%E5%85%A8%E9%80%80%E5%87%BA%E7%BA%BF%E7%A8%8B%E6%96%B9%E6%B3%95/">Java多线程编程安全退出线程方法</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-MultiDex%E5%88%86%E5%8C%85/">Android-MultiDex分包</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-textview%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9%E6%8C%87%E5%AE%9A%E6%96%87%E5%AD%97%E9%A2%9C%E8%89%B2/">Android-Textview动态修改指定文字颜色</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-%E6%A0%B9%E6%8D%AE%E4%B8%89%E7%82%B9%E5%9D%90%E6%A0%87%E6%B1%82%E4%B8%89%E8%A7%92%E5%BD%A2%E9%9D%A2%E7%A7%AF/">Android-根据三点坐标求三角形面积</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-%E8%8B%B1%E6%96%87%E5%8D%95%E8%AF%8D%E5%8D%87%E5%BA%8F%E6%8E%92%E5%BA%8F%EF%BC%88Collections-sort()%EF%BC%89/">Android-英文单词升序排序（Collections-Sort()）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android%E4%B8%AD%E6%9B%B4%E6%96%B0UI%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/">android中更新UI的几种方式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/viewpager%E8%87%AA%E5%AE%9A%E4%B9%89%E6%BB%91%E5%8A%A8%E9%80%9F%E5%BA%A6/">Viewpager自定义滑动速度</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E5%BA%8F%E5%88%97%E5%8C%96%E6%96%B9%E6%A1%88/">数据序列化方案</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/%E7%A8%8B%E5%BA%8F%E5%91%98%E5%BF%85%E7%9F%A5%E7%9A%846%E7%82%B9%E7%BC%96%E7%A8%8B%E7%A7%98%E8%AF%80/">程序员必知的6点编程秘诀</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/%E7%B3%BB%E7%BB%9F%E6%97%A5%E5%8E%86-%E6%8F%92%E5%85%A5%E9%87%8D%E5%A4%8D%E4%BA%8B%E4%BB%B6%E8%A7%84%E5%88%99-(android-java)/">系统日历-插入重复事件规则-(Android-Java)</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android日常问题
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android-9-0-P-http-%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E7%9A%84%E9%97%AE%E9%A2%98/">Android-9-0-P-Http-网络请求的问题</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android-FaceBook%E7%99%BB%E5%BD%95-%E5%88%86%E4%BA%AB%E8%8E%B7%E5%8F%96HashKey%EF%BC%88%E5%AF%86%E9%92%A5%E6%95%A3%E5%88%97%EF%BC%89%E7%9A%84%E7%AE%80%E5%8D%95%E6%96%B9%E6%B3%95/">Android-FaceBook登录-分享获取HashKey（密钥散列）的简单方法</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android-studio-%E7%82%B9%E5%87%BB%E8%BF%90%E8%A1%8C%E6%80%BB%E6%98%AF%E8%BF%9B%E5%85%A5Debug%E6%A8%A1%E5%BC%8F/">Android-Studio-点击运行总是进入Debug模式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android%E8%BF%9B%E7%A8%8B%E4%BF%9D%E6%B4%BB-%E6%81%AF%E5%B1%8F%E5%90%8E%E5%90%8E%E5%8F%B0%E4%BF%9D%E6%8C%81%E5%AE%9A%E4%BD%8D%E3%80%81%E7%BD%91%E7%BB%9C%E8%BF%90%E8%A1%8C/">Android进程保活-息屏后后台保持定位、网络运行</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/DatePickerDialog--setMinDate-setMaxDate%E5%90%8E%E6%A0%87%E9%A2%98%E9%9A%8F%E7%9D%80%E5%8F%98%E5%8C%96-%EF%BC%88%E5%8E%BB%E6%8E%89%E6%A0%87%E9%A2%98%EF%BC%89/">DatePickerDialog--setMinDate-setMaxDate后标题随着变化-（去掉标题）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/recyclerview-smoothScrollToPosition()%E5%B9%B3%E6%BB%91%E5%A4%B1%E6%95%88-%E6%9C%AA%E8%B5%B7%E6%95%88%E6%9E%9C/">Recyclerview-smoothScrollToPosition()平滑失效-未起效果</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/%E8%BD%AF%E9%94%AE%E7%9B%98%E5%BC%B9%E5%87%BA%E5%90%8E%E5%B8%83%E5%B1%80%E4%B8%8A%E7%A7%BB/">软键盘弹出后布局上移</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/studio%E6%8F%92%E4%BB%B6%E4%B8%8B%E8%BD%BD%E6%85%A2%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/">Studio插件下载慢解决方法</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Material-Design新控件
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/AppbarLayout/">AppbarLayout</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/Chronometer%E8%AE%A1%E6%97%B6%E5%99%A8/">Chronometer计时器</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/FloatingActionButton(%E6%82%AC%E6%B5%AE%E6%8C%89%E9%92%AE)/">FloatingActionButton(悬浮按钮)</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/Snackbar/">Snackbar</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/SwitchCompat/">SwitchCompat</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/TabLayout/">TabLayout</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/TextInputLayout/">TextInputLayout</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            android-https双向验证
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/Glide-okhttps%E8%AF%81%E4%B9%A6%E9%AA%8C%E8%AF%81%E5%85%A8%E5%B1%80%E9%85%8D%E7%BD%AE/">Glide-Okhttps证书验证全局配置</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/P12%E8%AF%81%E4%B9%A6%E8%BD%ACBKS%E8%AF%81%E4%B9%A6/">P12证书转BKS证书</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81-%E6%80%BB%E7%BB%93/">Android-Https双向验证-总结</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-okhttps%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/">Android-Okhttps双向验证</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-webView%E7%9A%84%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/">Android-webView的双向验证</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-%E5%8D%95%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81%E7%9F%A5%E8%AF%86%E7%82%B9/">Android-单双向验证知识点</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android%E8%8E%B7%E5%8F%96%E8%AF%81%E4%B9%A6%E6%96%87%E4%BB%B6/">Android获取证书文件</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/https%E5%8F%8C%E5%90%91%E8%AE%A4%E8%AF%81%E8%AF%81%E4%B9%A6%E7%94%9F%E6%88%90/">Https双向认证证书生成</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/phpstudy%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E6%9C%8D%E5%8A%A1%E5%99%A8/">Phpstudy搭建本地服务器</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/%E9%85%8D%E7%BD%AE%E5%AE%8C%E6%88%90%E5%90%8E%E7%9A%84%E6%B5%8B%E8%AF%95/">配置完成后的测试</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            android-加密-解密-数据压缩
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/android-%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86-%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/android-%E5%8E%9F%E7%94%9Fbase64/">Android-原生Base64</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86-%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/10%E8%BF%9B%E5%88%B6%E8%BD%AC20%E8%BF%9B%E5%88%B6%EF%BC%88%E4%BB%BB%E6%84%8F%E8%BF%9B%E5%88%B6-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AD%97%E7%AC%A6%EF%BC%89/">10进制转20进制（任意进制-自定义字符）</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86-%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/%E5%8E%8B%E7%BC%A9%E7%AE%97%E6%B3%95%E8%BF%9B%E8%A1%8C%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8E%8B%E7%BC%A9/">压缩算法进行字符串压缩</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            rxjava2
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/rxjava2/Rxjava2%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">Rxjava2的基本使用</a></li>  <li class="file"><a href="/wiki/Android%20Application/rxjava2/rxjava2%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">Rxjava2基本概念</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android FrameWork
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Framework源码分析
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android 13
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            InPutManagerService
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/3.InputReader%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/">3.InputReader事件处理</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/1.InputFlinger%E7%9A%84%E5%90%AF%E5%8A%A8/">1.InputFlinger的启动</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/2.EventHub%E8%8E%B7%E5%8F%96%E4%BA%8B%E4%BB%B6/">2.EventHub获取事件</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/4.InputDispatcher%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/">4.InputDispatcher事件分发</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/5.%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E5%9C%A8%E5%BA%94%E7%94%A8%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%88%86%E5%8F%91%E5%92%8C%E5%A4%84%E7%90%86/">5.触摸事件在应用进程的分发和处理</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            WMSAMS
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/1.%E7%AA%97%E5%8F%A3%E5%B1%82%E7%BA%A7%20_%E5%AE%B9%E5%99%A8%E7%B1%BB/">1.窗口层级 _容器类</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/2.%E7%AA%97%E5%8F%A3%E5%B1%82%E7%BA%A7%20_%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84%E6%A0%91%E7%9A%84%E6%9E%84%E5%BB%BA/">2.窗口层级 _层级结构树的构建</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/3.%E7%AA%97%E5%8F%A3%E5%B1%82%E7%BA%A7_%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84%E6%A0%91%E6%B7%BB%E5%8A%A0%E7%AA%97%E5%8F%A3/">3.窗口层级_层级结构树添加窗口</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/4.WMS%E7%AA%97%E5%8F%A3%E7%9B%B8%E5%85%B3%E6%B5%81%E7%A8%8B/"></a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/1.android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BSeLinux%E6%9D%83%E9%99%90%E4%BB%8B%E7%BB%8D/">1.Android13启动流程之SeLinux权限介绍.md</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/2.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BFirstStageMain%E9%98%B6%E6%AE%B5/">2.Android13启动流程之FirstStageMain阶段</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/3.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BSecondStageMain%E9%98%B6%E6%AE%B5/">3.Android13启动流程之SecondStageMain阶段</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/4.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BZygote%E5%92%8CSystemServer%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">4.Android13启动流程之Zygote和SystemServer启动流程</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/5.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BSystemServer%E5%86%85%E9%83%A8%E9%80%BB%E8%BE%91%E5%88%86%E6%9E%90/">5.android13启动流程之SystemServer内部逻辑分析.md</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/6.PowerManagerService%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%92%8C%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95/">6.PowerManagerService启动流程和核心方法</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/7.%E7%82%B9%E5%87%BB%E6%A1%8C%E9%9D%A2APP%E5%9B%BE%E6%A0%87%EF%BC%8C%E5%88%B0APP%E7%95%8C%E9%9D%A2%E6%98%BE%E7%A4%BA%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90(%E4%B8%80)/">7.点击桌面APP图标，到APP界面显示流程分析</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/8.%E7%82%B9%E5%87%BB%E6%A1%8C%E9%9D%A2APP%E5%9B%BE%E6%A0%87%EF%BC%8C%E5%88%B0APP%E7%95%8C%E9%9D%A2%E6%98%BE%E7%A4%BA%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90(%E4%BA%8C)/">8.点击桌面APP图标，到APP界面显示流程分析(二)</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Framework相关
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/1.Handler%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">Handler消息机制原理解析</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/2.Binder%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">Binder原理解析</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/ANR%E7%9A%84%E4%BA%A7%E7%94%9F%E6%9C%BA%E5%88%B6/">ANR的产生机制</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/SystemUI/">SystemUI</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/Android%20FrameWork/LINUX%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4/">LINUX基础命令</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/VIM%E4%BD%BF%E7%94%A8/">VIM使用</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/adb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">Adb常用命令</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1/">自定义服务</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/%E4%BD%BF%E7%94%A8%20git%20add%20-p%20%E6%95%B4%E7%90%86%20patch/">使用Git Add -P 整理 Patch</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/dumpsys%E5%91%BD%E4%BB%A4%E7%94%A8%E6%B3%95/">Dumpsys命令用法</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/AOSP%20Repo%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99/">AOSP Repo 命令参考资料</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/ADB%E5%92%8CMonkey%E6%B5%8B%E8%AF%95/">ADB和Monkey测试</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/AOSP%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">AOSP常用编译和查找命令文件</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Eclipse%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/">Eclipse安装教程</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Windows%E5%92%8CUbuntu%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85/">Windows和Ubuntu双系统安装</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Android%20%E6%BA%90%E7%A0%81%E6%A0%B9%E7%9B%AE%E5%BD%95%E4%BB%8B%E7%BB%8D/">Android源码根目录介绍</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98/">Framework遇到的问题</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/%E5%AF%BC%E5%85%A5%E7%B3%BB%E7%BB%9F%E6%BA%90%E7%A0%81%E5%88%B0Studio/">导入系统源码到Studio</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Linux%20%E8%AE%BE%E7%BD%AEswap/">Linux设置swap</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/wine%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8/">Wine安装及使用</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Selinux&SeAndroid/">Selinux&SeAndroid</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/rc%E6%96%87%E4%BB%B6%E8%AF%AD%E6%B3%95%E8%A7%84%E5%88%99/">Rc文件语法规则</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/ASFP%20(android%20studio%20for%20platform)%E4%BD%BF%E7%94%A8/">ASFP (Android Studio for Platform)使用</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            Android进阶
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Jetpack
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/Jetpack%E6%9E%B6%E6%9E%84%E7%BB%84%E4%BB%B6%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%B2%BE%E9%80%9A/">Jetpack架构组件从入门到精通</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/1.LifeCycle/">1.LifeCycle</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/2.LiveData/">2.LiveData</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/3.DataBinding/">3.DataBinding</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/4.Dagger2/">4.Dagger2</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/5.ViewModle/">5.ViewModle</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/6.Room/">6.Room</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/7.Hilt/">7.Hilt</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/8.Paging/">8.Paging</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/9.WorkManager/">9.WorkManager</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/10.Navigation/">10.Navigation</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            NDK
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android进阶之旅
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/12_makefile/">12_makefile</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/16_1_Cmake%E8%AF%AD%E6%B3%95/">16_1_Cmake语法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/16_2_Cmake%E9%A1%B9%E7%9B%AE%E5%B8%B8%E7%94%A8/">16_2_Cmake项目常用</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/19_NDK%E9%9D%A2%E8%AF%95%E9%A2%98/">19_NDK面试题</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/11_%E7%BC%96%E8%AF%91%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E5%8E%9F%E7%90%86/">11_编译流程详解/静态库与动态库原理.md</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/13_android.mk/">13_android.mk</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/14_Application.mk/">14_Application.mk</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/15_Android.mk%E5%92%8CAndroid.bp%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB/">15_Android.mk和Android.bp对应关系.md</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/17_Shell%E8%84%9A%E6%9C%AC/">17_Shell脚本</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/18_NDK%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/">18_NDK环境配置</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/1_c%E5%9F%BA%E7%A1%80/">1_c基础</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/3_jni_native%E5%B1%82%E6%9E%84%E5%BB%BAjava%E5%AF%B9%E8%B1%A1/">3_jni_native层构建java对象</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/2_jni%E5%9F%BA%E7%A1%80/"></a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/4_jni_%E6%95%B0%E7%BB%84%E7%9A%84%E7%BB%86%E8%8A%82%E5%A4%84%E7%90%86/">4_jni_数组的细节处理</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/5_c%E8%BF%9B%E9%98%B6_%E5%86%85%E5%AD%98%E5%9B%9B%E9%A9%B1%E6%A8%A1%E5%9E%8B/">5_c进阶_内存四驱模型</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/7_%E9%93%B6%E8%A1%8C%E5%8D%A1%E8%AF%86%E5%88%AB/">7_银行卡识别.md</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/6_c++%E5%9F%BA%E7%A1%80/">6_c++基础</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/8_%E7%AE%97%E6%B3%95/">8_算法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/9_%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80/">9_音视频基础</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/20.jni%E6%96%B9%E6%B3%95%E5%A4%A7%E5%85%A8%E5%8F%8A%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/">20.jni方法大全及使用示例</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            蒋超大佬扫盲
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/1.%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">1.基础知识</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/CMake%E8%AF%AD%E6%B3%95/">CMake语法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/2.Cmake%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">2.Cmake基础知识</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/3.JNI%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/">3.JNI数据类型</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/4.JavaVM/">JavaVM</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/5.OPUS%E7%BC%96%E8%AF%91/">5.opus编译</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/6.libusb/">6.libusb</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/7.mmkv%E7%BC%96%E8%AF%91/">7.mmkv编译</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/8.mqtt/">8.mqtt</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/9.%E5%87%BD%E6%95%B0%E7%AD%BE%E5%90%8D%E5%8F%8Andk%E8%B0%83%E7%94%A8java%E6%96%B9%E6%B3%95/">9.函数签名及ndk调用java方法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/10.%E7%BA%BF%E7%A8%8B/">10.线程</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+                    </li> 
+                    
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            性能优化
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/leakcanary%E7%9A%84%E4%BD%BF%E7%94%A8/">Leakcanary的使用</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/1.App%E6%80%A7%E8%83%BD%E6%A6%82%E8%A7%88%E4%B8%8E%E5%B9%B3%E5%8F%B0%E5%8C%96%E5%AE%9E%E8%B7%B5/">1.App性能概览与平台化实践</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/2.App%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96/">2.App启动优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/3.%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/">3.内存优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/4.%E5%B8%83%E5%B1%80%E4%BC%98%E5%8C%96/">4.布局优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/5.%E5%8D%A1%E9%A1%BF%E4%BC%98%E5%8C%96/">5.卡顿优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/6.%E7%BA%BF%E7%A8%8B%E4%BC%98%E5%8C%96/">6.线程优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/7.%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/">7.网络优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/8.%E7%94%B5%E9%87%8F%E4%BC%98%E5%8C%96/">8.电量优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/9.%E7%98%A6%E8%BA%AB%E4%BC%98%E5%8C%96/">9.瘦身优化</a></li>  <li class="file active"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/10.%E7%A8%B3%E5%AE%9A%E6%80%A7%E4%BC%98%E5%8C%96/">10.稳定性优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/11.%E4%B8%93%E9%A1%B9%E6%8A%80%E6%9C%AF%E4%BC%98%E5%8C%96/">11.专项技术优化</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/java%20%E5%8F%8D%E5%B0%84%E5%8F%8A%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/">Java 反射及代理模式初步学习</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E5%BA%93Retrofit/">网络请求库Retrofit</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            C++
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            C++教程从0到1入门编程
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/C++/C++%E6%95%99%E7%A8%8B%E4%BB%8E0%E5%88%B01%E5%85%A5%E9%97%A8%E7%BC%96%E7%A8%8B/1.C++%E5%9F%BA%E7%A1%80/">C++基础</a></li>  <li class="file"><a href="/wiki/C++/C++%E6%95%99%E7%A8%8B%E4%BB%8E0%E5%88%B01%E5%85%A5%E9%97%A8%E7%BC%96%E7%A8%8B/2.C++%E6%8F%90%E9%AB%98/">C++提高</a></li>  <li class="file"><a href="/wiki/C++/C++%E6%95%99%E7%A8%8B%E4%BB%8E0%E5%88%B01%E5%85%A5%E9%97%A8%E7%BC%96%E7%A8%8B/3.C++%E6%A0%B8%E5%BF%83/">C++核心</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/C++/window%E7%B3%BB%E7%BB%9F_vscode%E4%B8%AD%E9%85%8D%E7%BD%AE%20c++%E7%8E%AF%E5%A2%83/">Vscode中配置 C++环境</a></li>  <li class="file"><a href="/wiki/C++/%E8%BD%BB%E6%9D%BE%E6%90%9E%E5%AE%9AC++%E8%AF%AD%E8%A8%80/">轻松搞定C++语言</a></li>  <li class="file"><a href="/wiki/C++/%E8%BD%BB%E6%9D%BE%E6%90%9E%E5%AE%9AC%E8%AF%AD%E8%A8%80(%E6%8F%90%E9%AB%98%E7%AF%87)/">轻松搞定C语言(提高篇)</a></li>  <li class="file"><a href="/wiki/C++/%E5%BD%BB%E5%BA%95%E6%90%9E%E5%AE%9AC%E6%8C%87%E9%92%88/">彻底搞定C指针</a></li>  <li class="file"><a href="/wiki/C++/Linux%E7%B3%BB%E7%BB%9F_vscode%E4%B8%AD%E9%85%8D%E7%BD%AE%20c++%E7%8E%AF%E5%A2%83/">Linux系统_vscode中配置 c++环境.md</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            其他笔记
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Flutter
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Android-Studio%E9%85%8D%E7%BD%AEFlutter/">Android-Studio配置Flutter</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter(Android-%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/">Flutter(Android-混合开发)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter-Decoration%E8%83%8C%E6%99%AF%E8%AE%BE%E5%AE%9A%EF%BC%88%E8%BE%B9%E6%A1%86%E3%80%81%E5%9C%86%E8%A7%92%E3%80%81%E9%98%B4%E5%BD%B1%E3%80%81%E5%BD%A2%E7%8A%B6%E3%80%81%E6%B8%90%E5%8F%98%E3%80%81%E8%83%8C%E6%99%AF%E5%9B%BE%E5%83%8F%E7%AD%89%EF%BC%89/">Flutter-Decoration背景设定（边框、圆角、阴影、形状、渐变、背景图像等）</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter-%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E5%92%8C%E9%A1%B9%E7%9B%AE%E8%B5%84%E6%BA%90/">Flutter-目录结构和项目资源</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter%E4%B8%AD%E7%9A%84%E6%89%8B%E5%8A%BF%E5%A4%84%E7%90%86/">Flutter中的手势处理</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter%E4%B9%8BScaffold/">Flutter之Scaffold</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter-%E6%8E%A7%E4%BB%B6%E4%B9%8B-MaterialApp/">Flutter-控件之-MaterialApp</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter%E4%BB%A3%E7%A0%81%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/">Flutter代码开发规范</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/StatelessWidget%E5%92%8CStatefulWidget%E7%9A%84%E5%8C%BA%E5%88%AB/">StatelessWidget和StatefulWidget的区别</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-BottomAppBar-%EF%BC%88%E4%B8%8D%E8%A7%84%E5%88%99%E5%BA%95%E9%83%A8%E5%B7%A5%E5%85%B7%E6%A0%8F%EF%BC%89/">Flutter-BottomAppBar-（不规则底部工具栏）</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-BottomNavigationBar%E7%B1%BB/">Flutter-BottomNavigationBar类</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Chip/">Flutter-Chip</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-ExpansionTile(%E9%97%AD%E5%90%88%E5%88%97%E8%A1%A8)/">Flutter-ExpansionTile(闭合列表)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Flexible%E5%92%8C-Expanded/">Flutter-Flexible和-Expanded</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-ListTile(06)/">Flutter-ListTile(06)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Padding/">Flutter-Padding</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Stack(%E5%B1%82%E5%8F%A0%E6%8E%A7%E4%BB%B6)/">Flutter-Stack(层叠控件)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Text(02)/">Flutter-Text(02)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-card%EF%BC%88%E5%8D%A1%E7%89%87%E5%B8%83%E5%B1%80%EF%BC%89/">Flutter-Card（卡片布局）</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-gridView/">Flutter-gridView</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-listview(07)/">Flutter-Listview(07)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-mainAxisAlignment%E5%92%8CcrossAxisAlignment/">Flutter-mainAxisAlignment和crossAxisAlignment</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%8D%95%E9%80%89%E6%A1%86%E5%92%8C%E5%A4%8D%E9%80%89%E6%A1%86(05)/">Flutter-单选框和复选框(05)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%9B%BE%E7%89%87(04)/">Flutter-图片(04)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%AF%BC%E8%88%AA%E8%BF%94%E5%9B%9E%E6%8B%A6%E6%88%AAWillPopScope(%E9%98%B2%E8%AF%AF%E8%A7%A6)/">Flutter-导航返回拦截WillPopScope(防误触)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%B1%82%E5%8F%A0%E5%B8%83%E5%B1%80Stack%E3%80%81Positioned/">Flutter-层叠布局Stack、Positioned</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%BC%B9%E6%80%A7%E5%B8%83%E5%B1%80Flex/">Flutter-弹性布局Flex</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E6%8C%89%E9%92%AE(03)/">Flutter-按钮(03)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E6%B5%81%E5%BC%8F%E5%B8%83%E5%B1%80Wrap%E3%80%81Flow/">Flutter-流式布局Wrap、Flow</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E7%BA%BF%E6%80%A7%E5%B8%83%E5%B1%80Row%E5%92%8CColumn-1/">Flutter-线性布局Row和Column-1</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E7%BA%BF%E6%80%A7%E5%B8%83%E5%B1%80Row%E5%92%8CColumn/">Flutter-线性布局Row和Column</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E8%BE%93%E5%85%A5%E6%A1%86%E5%92%8C%E6%A0%87%E7%82%B9/">Flutter-输入框和标点</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E9%A2%9C%E8%89%B2%E6%B8%90%E5%8F%98/">Flutter-颜色渐变</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8(01)/">Flutter基础使用(01)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter%E7%AE%80%E4%BB%8B/">Flutter简介</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            QT
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/QT/QT-Creator%E5%AE%89%E8%A3%85/">QT-Creator安装</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            svn配置及使用
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E4%B8%8B%E8%BD%BD%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93/">Svn下载远程仓库</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/">Svn客户端安装和配置</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/">Svn服务端安装和配置</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/">Svn的基本操作</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/win11%E8%87%AA%E5%8A%A8%E5%85%B3%E6%9C%BA/">Win11自动关机</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/%E6%88%91%E7%9A%84%E7%AE%80%E5%8E%86/">我的简历</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/csdn%E6%96%87%E7%AB%A0%E5%AF%BC%E5%87%BAmarkdown/">Csdn文章导出到本地markdown</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+    </div>
+    <script>
+        $(document).ready(function() {
+            var iconFolderOpenClass  = 'fa-folder-open';
+            var iconFolderCloseClass = 'fa-folder';
+            var iconAllExpandClass = 'fa-angle-double-down';
+            var iconAllPackClass = 'fa-angle-double-up';
+            // Handle directory-tree expansion:
+            // 左键单独展开目录
+            $(document).on('click', '#categories a[data-role="directory"]', function (event) {
+                event.preventDefault();
+
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var subtree = $(this).siblings('ul');
+                icon.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if (expanded) {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideUp({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderCloseClass);
+                } else {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideDown({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderOpenClass);
+                }
+            });
+            // 右键展开下属所有目录
+            $('#categories a[data-role="directory"]').bind("contextmenu", function(event){
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var listNode = $(this).siblings('ul');
+                var subtrees = $.merge(listNode.find('li ul'), listNode);
+                var icons = $.merge(listNode.find('.fa'), icon);
+                icons.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if(expanded) {
+                    subtrees.slideUp({ duration: 100 });
+                    icons.addClass(iconFolderCloseClass);
+                } else {
+                    subtrees.slideDown({ duration: 100 });
+                    icons.addClass(iconFolderOpenClass);
+                }
+            })
+            // 展开关闭所有目录按钮
+            $(document).on('click', '#allExpand', function (event) {
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconAllExpandClass);
+                icon.removeClass(iconAllExpandClass).removeClass(iconAllPackClass);
+                if(expanded) {
+                    $('#sidebar .fa.fa-folder').removeClass('fa-folder').addClass('fa-folder-open')
+                    $('#categories li ul').slideDown({ duration: 100 });
+                    icon.addClass(iconAllPackClass);
+                } else {
+                    $('#sidebar .fa.fa-folder-open').removeClass('fa-folder-open').addClass('fa-folder')
+                    $('#categories li ul').slideUp({ duration: 100 });
+                    icon.addClass(iconAllExpandClass);
+                }
+            });  
+        });
+    </script>
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+            <section id="main"><article id="post-Android进阶/性能优化/10.稳定性优化" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+                    <div class="article-meta">
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/Android%E8%BF%9B%E9%98%B6/">Android进阶</a><i class="fa fa-angle-right"></i><a class="article-category-link" href="/categories/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a>
+    </div>
+
+                        
+                        
+  
+
+
+
+                        
+                        
+                    </div>
+                
+                
+   
+
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+        
+            
+        
+        
+            <p> <strong>一、如何提升App的稳定性</strong></p>
+<p>正确认识</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.稳定性是大问题，Crash是PO优先级</span><br><span class="line">2.稳定性可优化的面很广</span><br></pre></td></tr></table></figure>
+
+<p>稳定性纬度</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.Crash纬度</span><br><span class="line">2.性能纬度</span><br><span class="line">3.业务高可用纬度</span><br></pre></td></tr></table></figure>
+
+<p>稳定性优化概述</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.重在预防、监控必不可少</span><br><span class="line">2.思考更深一层、重视隐含信息</span><br><span class="line">3.长效保持需要科学流程</span><br></pre></td></tr></table></figure>
+
+<p><strong>二、高Crash率的破解之道</strong></p>
+<p>Crash相关指标</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1.UV、PV Crash率(uv主要针对用户使用量，用户使用崩溃率，pv是用户使用的频率，用户使用崩溃的频率)</span><br><span class="line">  - UV Crash率= Crash UV/DAU</span><br><span class="line">  - UV 方便评估用户影响范围，结合 PV</span><br><span class="line">  - 注意:沿用同一种衡量方式</span><br><span class="line">2.Java、Native Crash率</span><br><span class="line">3.启动、重点流程Crash率</span><br><span class="line">4.增量、存量Crash率</span><br><span class="line">5.启动Crash率（启动时崩溃）</span><br><span class="line">  - 影响最严重的Crash</span><br><span class="line">  - 结合客户端容灾</span><br><span class="line">6.增量、存量Crash率（增量指新增的crash，存量指以前老版本就存在的crash）</span><br><span class="line">  - 增量Crash是新版本重点</span><br><span class="line">  - 存量Crash是持续啃的硬骨头</span><br><span class="line">  - 优先解决增量、持续跟进存量</span><br><span class="line">7.Crash率评价</span><br><span class="line">  - 务必在千分之二以下</span><br><span class="line">  - Crash率万分位优秀</span><br></pre></td></tr></table></figure>
+
+<p>Crash关键问题</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">尽可能还原Crash现场</span><br><span class="line">  - 堆栈、设备、OS版本、进程、线程名、Logcat</span><br><span class="line">  - 前后台、使用时长、App版本、小版本、渠道</span><br><span class="line">  - CPU架构、内存信息、线程数、资源包信息、行为日志</span><br><span class="line">APM后台聚合展示</span><br><span class="line">  - Crash现场信息</span><br><span class="line">  - Crash Top机型、OS版本、分布版本、区域</span><br><span class="line">  - Crash起始版本、上报趋势、是否新增、持续、量级</span><br><span class="line">责任归属</span><br><span class="line">  - 专项小组轮值</span><br><span class="line">  - 自动匹配分配</span><br><span class="line">  - 处理流程全记录</span><br></pre></td></tr></table></figure>
+
+<p>整体结构</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.采集层:错误堆栈、设备信息、行为日志、其它信息</span><br><span class="line">2.处理层:数据清洗、数据聚合、纬度分类、趋势对比</span><br><span class="line">3.展示层:数据还原、纬度信息、起始版本、其它信息</span><br><span class="line">4.报警层:环比、同比、邮件、IM、电话</span><br></pre></td></tr></table></figure>
+
+<p>单个Crash处理方案</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.根据堆栈及现场信息找答案</span><br><span class="line">2.找共性:机型、OS、实验开关、资源包</span><br><span class="line">3.线下复现、远程调试</span><br></pre></td></tr></table></figure>
+
+<p>Crash率治理方案</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.解决线上常规Crash</span><br><span class="line">2.系统级Crash尝试Hook绕过</span><br><span class="line">3.疑难Crash重点突破、更换方案</span><br></pre></td></tr></table></figure>
+
+<p><strong>三、移动端业务高可用方案建设</strong></p>
+<p>业务高可用重要性</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.高可用:性能+业务</span><br><span class="line">2.业务高可用侧重于用户功能完整可用</span><br><span class="line">3.业务高可用真实的影响收入</span><br></pre></td></tr></table></figure>
+
+<p>业务高可用方案建设</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">数据采集</span><br><span class="line">  - 梳理项目主流程、核心路径、关键节点</span><br><span class="line">  - Aop自动采集、统一上报</span><br><span class="line">报警策略</span><br><span class="line">  - 闽值报警</span><br><span class="line">  - 趋势报警</span><br><span class="line">  - 特定指标报警、直接上报</span><br><span class="line">异常监控</span><br><span class="line">  - Catch代码块</span><br><span class="line">  - 异常逻辑</span><br><span class="line">单点追查</span><br><span class="line">  - 需要针对性分析的特定问题</span><br><span class="line">  - 全量日志回捞，专项分析</span><br><span class="line">兜底策略</span><br><span class="line">  - 配置中心，功能开关</span><br><span class="line">  - 跳转分发中心</span><br></pre></td></tr></table></figure>
+
+<p><strong>四、移动端容灾方案</strong></p>
+<p>移动端容灾必要性</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">灾:性能、业务异常</span><br><span class="line">传统流程:用户反馈、重新打包、渠道更新，不可接受</span><br></pre></td></tr></table></figure>
+
+<p>容灾方案建设</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">功能开关</span><br><span class="line">  - 配置中心，服务端下发配置控制</span><br><span class="line">  - 针对场景:功能新加或代码改动</span><br><span class="line">统跳中心</span><br><span class="line">  - 界面切换通过路由，路由决定是否重定向</span><br><span class="line">  - eg:Native Bug不能热修则跳转到临时H5</span><br><span class="line">动态化修复</span><br><span class="line">  - 热修复能力，可监控、灰度、回滚、清除</span><br><span class="line">  - 推拉结合、多场景调用保证到达率</span><br><span class="line">  - Weex、RN增量更新</span><br><span class="line">安全模式</span><br><span class="line">  - 根据Crash信息自动恢复，多次启动失败重置App</span><br><span class="line">  - 严重Bug可阻塞性热修</span><br><span class="line">  - 异常熔断:多次请求失败则主动拒绝</span><br></pre></td></tr></table></figure>
+
+<p>容灾方案集合</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">功能开关-&gt;统跳中心-&gt;动态修复-&gt;安全模式</span><br></pre></td></tr></table></figure>
+
+<p><strong>五、稳定性长效治理</strong></p>
+<p>全流程Crash长效治理</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">开发阶段</span><br><span class="line">  - 统一编码规范、增强编码功底、技术评审、CodeReview机制</span><br><span class="line">  - 架构优化:能力收敛、统一容错</span><br><span class="line">测试阶段</span><br><span class="line">  - 功能测试、自动化测试、 回归测试、覆盖安装</span><br><span class="line">  - 特殊场景、机型等边界测试</span><br><span class="line">  - 云测平台</span><br><span class="line">合码阶段</span><br><span class="line">  - 编译检测、静态扫描</span><br><span class="line">  - 预编译流程、主流程自动回归</span><br><span class="line">发布阶段</span><br><span class="line">  - 多轮灰度</span><br><span class="line">  - 分场景、纬度全面覆盖</span><br><span class="line">运维阶段</span><br><span class="line">  - 灵敏监控</span><br><span class="line">  - 回滚、降级策略</span><br><span class="line">  - 热修、容灾方案</span><br></pre></td></tr></table></figure>
+
+<p><strong>六、问题</strong></p>
+<p>你们做了哪些稳定性方面的优化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.Crash专项优化</span><br><span class="line">2.性能稳定性优化</span><br><span class="line">3.业务稳定性优化</span><br></pre></td></tr></table></figure>
+
+<p>性能稳定性是怎么做的?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.线下发现问题、优化为主</span><br><span class="line">2.线上监控为主</span><br><span class="line">3.Crash专项</span><br></pre></td></tr></table></figure>
+
+<p>业务稳定性如何保障 ?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.数据采集+报警</span><br><span class="line">2.异常监控 + 单点追查</span><br></pre></td></tr></table></figure>
+
+<p>如果发生了异常情况，怎么快速止损?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.能力:功能开关、统跳中心</span><br><span class="line">2.动态修复:热修、资源包更新</span><br><span class="line">3.自主修复:安全模式</span><br></pre></td></tr></table></figure>
+
+
+            </div>
+        
+        <footer class="article-footer">
+        </footer>
+    </div>
+</article>
+
+
+    
+<nav id="article-nav">
+   
+</nav>
+
+
+
+
+
+    
+    
+
+
+
+
+<!-- baidu url auto push script -->
+<script type="text/javascript">
+    !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=window.location.href,o=document.referrer;if(!e.test(r)){var n="//api.share.baidu.com/s.gif";o?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var t=new Image;t.src=n}}(window);
+</script>     
+</section>
+        </div>
+        <footer id="footer">
+    <div class="outer">
+       
+    </div>
+</footer>
+
+        
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>

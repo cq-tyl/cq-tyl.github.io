@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+ <meta name="referrer" content="no-referrer"/>
+    
+    <title>3.InputReader事件处理 | TYL</title>
+    
+    
+        <meta name="keywords" content="3.InputReader事件处理" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="####回顾 从前面的InputFlinger的启动可知，InputReader线程启动后会循环执行loopOnce()方法，然后阻塞在getEvents等待事件的上报，这里就从loopOnce获取到事件被唤醒后来分析InputReader对事件的处理。 InputReader::loopOnce()frameworks&#x2F;native&#x2F;services&#x2F;inputfl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="3.InputReader事件处理">
+<meta property="og:url" content="https://cq_tyl.gitee.io/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/3.InputReader%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="TYL">
+<meta property="og:description" content="####回顾 从前面的InputFlinger的启动可知，InputReader线程启动后会循环执行loopOnce()方法，然后阻塞在getEvents等待事件的上报，这里就从loopOnce获取到事件被唤醒后来分析InputReader对事件的处理。 InputReader::loopOnce()frameworks&#x2F;native&#x2F;services&#x2F;inputfl">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-12-29T03:09:54.231Z">
+<meta property="article:modified_time" content="2024-01-02T08:58:59.359Z">
+<meta property="article:author" content="cq_tyl">
+<meta name="twitter:card" content="summary">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="TYL" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/favicon.ico" />
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/open-sans/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+<script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+<script src="/libs/jquery/plugins/cookie/1.4.1/jquery.cookie.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<head></head>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">TYL</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/">首页</a>
+                
+                    <a class="main-nav-link" href="/about">我的简历</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"> </button><input type="hidden" name="sitesearch" value="https://cq_tyl.gitee.io"></form>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/">首页</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">我的简历</a></td>
+                
+                <td>
+                    
+    <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><input type="hidden" name="sitesearch" value="https://cq_tyl.gitee.io"></form>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap" id='categories'>
+        <h3 class="widget-title">
+            <span>categories</span>
+            &nbsp;
+            <a id='allExpand' href="#">
+                <i class="fa fa-angle-double-down fa-2x"></i>
+            </a>
+        </h3>
+        
+        
+        
+         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android Application
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            AndroidStudio插件
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/Alibaba-Java-Coding-Guidelines%EF%BC%88%E9%98%BF%E9%87%8C%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83%E6%A3%80%E6%B5%8B%EF%BC%89/">Alibaba-Java-Coding-Guidelines（阿里代码规范检测）</a></li>  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/Studio%E6%B1%89%E5%8C%96%E6%8F%92%E4%BB%B6/">Studio汉化插件</a></li>  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/%E7%BF%BB%E8%AF%91%E6%8F%92%E4%BB%B6Translation/">翻译插件Translation</a></li>  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/database-navigator%E6%9F%A5%E7%9C%8B%E6%95%B0%E6%8D%AE%E5%BA%93/">Database-Navigator查看数据库</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android兼容适配
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E8%99%9A%E6%8B%9F%E6%8C%89%E9%94%AE%E9%81%AE%E6%8C%A1%E5%B8%83%E5%B1%80-%E9%9A%90%E8%97%8F%E5%BA%95%E9%83%A8%E8%99%9A%E6%8B%9F%E6%8C%89%E9%94%AENavigation%E5%AE%9E%E7%8E%B0%E5%85%A8%E5%B1%8F/">虚拟按键遮挡布局-隐藏底部虚拟按键Navigation实现全屏</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E8%AE%BE%E7%BD%AEImageView%E5%9B%BE%E7%89%87%E6%97%B6,%E5%AE%BD%E5%BA%A6%E4%B8%BAmatch%E6%97%B6%E9%9C%80%E8%A6%81%E8%AE%BE%E7%BD%AEscaleType%E4%B8%BAfitXY/">设置ImageView图片时,宽度为match时需要设置scaleType为fitXY</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E9%80%82%E9%85%8D%E5%8D%8E%E4%B8%BA%E7%AD%89%E6%9C%89%E8%99%9A%E6%8B%9F%E6%8C%89%E9%94%AE%E7%9A%84%E5%B1%8F%E5%B9%95%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">适配华为等有虚拟按键的屏幕的解决方案</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E5%A4%9A%E4%B8%AAfragment%E9%87%8D%E5%8F%A0%E6%97%B6%EF%BC%8C%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6%E7%A9%BF%E9%80%8F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%88viewpager+fragment%EF%BC%89/">多个Fragment重叠时，点击事件穿透解决方法（viewpager+fragment）</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android动画
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/LayoutTransition%EF%BC%88%E9%80%9A%E7%94%A8%E9%9A%90%E8%97%8F%E6%98%BE%E7%A4%BA%E5%8A%A8%E7%94%BB%EF%BC%89/">LayoutTransition（通用隐藏显示动画）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E5%85%B1%E4%BA%AB%E5%85%83%E7%B4%A0%EF%BC%88Shared-Element%EF%BC%89/">共享元素（Shared-Element）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E5%90%AF%E5%8A%A8%E9%A1%B5%E7%BC%A9%E6%94%BE%E5%8A%A8%E7%94%BB/">启动页缩放动画</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E5%B8%A7%E5%8A%A8%E7%94%BB/">帧动画</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E8%A1%A5%E9%97%B4%E5%8A%A8%E7%94%BB/">补间动画</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E6%8F%AD%E9%9C%B2%E6%95%88%E6%9E%9C/">揭露效果</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android基础
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JAV%E7%BA%BF%E7%A8%8B%E6%B1%A0/">JAV线程池</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/TCP%E5%8D%8F%E8%AE%AE%EF%BC%88Socket%EF%BC%89/">TCP协议（Socket）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Notifaction/">Notifaction</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JAVA%E9%9B%86%E5%90%88/">JAVA集合</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-%E8%AE%A1%E6%97%B6%E5%99%A8%EF%BC%88Handle+Runable-%E5%8F%AF%E9%87%8D%E7%BD%AE%E6%97%B6%E9%97%B4%E5%8F%AF%E6%9A%82%E5%81%9C%EF%BC%89/">Android-计时器（Handle+Runable-可重置时间可暂停）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JAVA%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1/">JAVA多线程之间的通信</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JSON%E6%95%B0%E6%8D%AE%E8%A7%A3%E6%9E%90/">JSON数据解析</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Sevice%EF%BC%88%E6%9C%8D%E5%8A%A1%EF%BC%89/">Sevice（服务）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%EF%BC%88%E5%9F%BA%E7%A1%80%EF%BC%89/">类加载器（基础）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/new-Random()--%E7%94%9F%E6%88%90%E9%9A%8F%E6%9C%BA%E6%95%B0/">New-Random()--生成随机数</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/SharedPreferences%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">SharedPreferences数据存储</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-popwind/">Android-Popwind</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E5%90%8C%E6%AD%A5%E9%94%81Synchronized%E5%92%8CLock/">同步锁Synchronized和Lock</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android-ConstraintLayout-%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3/">Android-ConstraintLayout-使用详解</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/EditText%E7%84%A6%E7%82%B9%E5%8A%A8%E6%80%81%E6%8E%A7%E5%88%B6/">EditText焦点动态控制</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/StringBuffer%E5%92%8CStringBuilder/">StringBuffer和StringBuilder</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/ANR/">ANR</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-ImageView-scaleType%E7%9A%84%E5%B1%9E%E6%80%A7%E7%90%86%E8%A7%A3/">Android-ImageView-scaleType的属性理解</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/">Android事件分发</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6/">逻辑运算符</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android-%E5%80%92%E8%AE%A1%E6%97%B6/">Android-倒计时</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android%E4%B8%AD%E6%8E%A5%E5%8F%A3%E5%9B%9E%E8%B0%83-%E6%96%B9%E6%B3%95%E5%9B%9E%E8%B0%83/">Android中接口回调-方法回调</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-6-0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90/">Android-6-0动态权限</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android-M-%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E6%9D%83%E9%99%90%E8%AF%B7%E6%B1%82/">Android-M-最简单的权限请求</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Toast%EF%BC%88%E8%87%AA%E5%AE%9A%E4%B9%89Toast%EF%BC%89/">Toast（自定义Toast）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-6-0%E6%96%B0%E7%89%B9%E6%80%A7/">Android-6-0新特性</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1-AsyncTask/">异步任务-AsyncTask</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/AndroidManifest-xml/">AndroidManifest-Xml</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Java-Character-%E7%B1%BB%EF%BC%88%E5%8D%95%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B-%E5%AD%97%E6%AF%8D-%E6%95%B0%E5%AD%97-%E5%A4%A7%E5%B0%8F%E5%86%99%E5%88%A4%E6%96%AD%EF%BC%89/">Java-Character-类（单个字符串类型-字母-数字-大小写判断）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/BroadCastReceiver(%E5%B9%BF%E6%92%AD)/">BroadCastReceiver(广播)</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Iterator%E8%BF%AD%E4%BB%A3%E5%99%A8/">Iterator迭代器</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/UDP%E5%8D%8F%E8%AE%AE/">UDP协议</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Activity%E5%90%91Fragment%E4%BC%A0%E5%80%BC/">Activity向Fragment传值</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android%E5%AD%97%E9%97%B4%E8%B7%9D%E5%92%8C%E8%A1%8C%E9%97%B4%E8%B7%9D/">Android字间距和行间距</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android工具类
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9%E6%A1%8C%E9%9D%A2%E5%9B%BE%E6%A0%87%E5%8F%8A%E5%BA%94%E7%94%A8%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8%E5%90%8D%E7%A7%B0/">Android动态修改桌面图标及应用桌面应用名称</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%8F%91%E5%B8%83%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%93%E5%88%B0JitPack%E4%B8%8A/">Android发布自定义库到JitPack上</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/JAVA%E5%86%85%E5%AD%98%E5%88%92%E5%88%86/">JAVA内存划分</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-studio-mac-%E8%8E%B7%E5%8F%96MD5-SHA1-SHA256%E8%AF%81%E4%B9%A6%E6%8C%87%E7%BA%B9/">Android-Studio-Mac-获取MD5-SHA1-SHA256证书指纹</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-textview%E7%A9%BA%E6%A0%BC%E5%8D%A0%E4%BD%8D%E7%AC%A6%E4%BB%A5%E5%8F%8A%E4%B8%80%E4%BA%9B%E5%85%B6%E4%BB%96%E5%8D%A0%E4%BD%8D%E7%AC%A6%E6%B1%87%E6%80%BB/">Android-Textview空格占位符以及一些其他占位符汇总</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/github%E5%9B%BE%E7%89%87%E5%8A%A0%E8%BD%BD%E5%A4%B1%E8%B4%A5/">Github图片加载失败</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E5%88%A4%E6%96%AD%E6%9F%90%E4%B8%AAactivity%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E6%A0%88%E5%A0%86%E4%B8%AD/">判断某个Activity是否存在栈堆中</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Androd-%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF%E5%8A%A8/">Androd-开机自启动</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-%E5%9C%A8%E6%B2%A1%E6%9C%89usb%E8%BF%9E%E6%8E%A5%E7%BA%BF%E7%9A%84%E6%83%85%E5%86%B5%E4%B8%8B%E5%A6%82%E4%BD%95%E8%BF%9E%E6%8E%A5%E6%89%8B%E6%9C%BA%E8%AE%BE%E5%A4%87/">Android-在没有Usb连接线的情况下如何连接手机设备</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E4%BF%9D%E6%B4%BB/">Android保活</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%B0%86String%E5%88%86%E5%89%B2%E8%BD%AC%E5%8C%96%E4%B8%BAArrayList/">Android将String分割转化为ArrayList</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9B%E4%B8%AA%E6%96%B9%E5%90%91%E6%BB%9A%E5%8A%A8%E7%9A%84%E8%B7%91%E9%A9%AC%E7%81%AFMarqueeViewLibrary/">Android自定义四个方向滚动的跑马灯MarqueeViewLibrary</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E7%AC%AC%E4%B8%89%E6%96%B9%E5%B8%B8%E7%94%A8%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%E6%A3%80%E6%B5%8B/">Android第三方常用安全漏洞检测</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/EventBus/">EventBus</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Glide%E8%AE%BE%E7%BD%AE%E5%9C%86%E8%A7%92%E3%80%81%E5%9C%86%E5%BD%A2%E5%9B%BE%E7%89%87%EF%BC%88%E6%97%A0%E9%9C%80%E5%86%8D%E5%88%9B%E5%BB%BA%E5%B7%A5%E5%85%B7%E7%B1%BB%E4%BA%86%EF%BC%89/">Glide设置圆角、圆形图片（无需再创建工具类了）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/GreenDao/">GreenDao</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/RxJava-RxAndroid/">RxJava-RxAndroid</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Sentry-Android%E9%9B%86%E6%88%90-%E4%BD%BF%E7%94%A8-%E6%B7%B7%E6%B7%86/">Sentry-Android集成-使用-混淆</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Svn%E5%BF%BD%E7%95%A5Android%E9%A1%B9%E7%9B%AE%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6-%E6%96%87%E4%BB%B6%E5%A4%B9/">Svn忽略Android项目上传文件-文件夹</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-RadioButton-drawableTop%E5%9B%BE%E7%89%87%E5%8F%98%E5%9E%8B/">Android-RadioButton-drawableTop图片变型</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E6%9C%AC%E5%9C%B0%E6%97%A5%E5%8E%86%E6%8F%92%E5%85%A5%E4%BA%8B%E4%BB%B6/">Android-本地日历插入事件</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E8%8E%B7%E5%8F%96assets%E5%86%85%E7%9A%84%E6%96%87%E4%BB%B6%E8%BD%ACFile/">Android-获取assets内的文件转File</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E8%BD%AF%E9%94%AE%E7%9B%98%E5%B7%A5%E5%85%B7%E7%B1%BB/">Android-软键盘工具类</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E9%80%8F%E6%98%8E%E5%BA%A6%E6%95%B0%E5%80%BC%E8%AE%B0%E5%BD%95%E8%A1%A8/">Android-透明度数值记录表</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android%E6%98%8E%E8%BF%9B%E5%BA%B75-1%E7%9B%92%E5%AD%90%E5%AE%9A%E6%97%B6%E5%BC%80%E5%85%B3%E6%9C%BA/">Android明进康5-1盒子定时开关机</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android%E8%B0%83%E8%AF%95%E8%BE%93%E5%87%BAlog%E6%89%93%E5%8D%B0%E4%BF%A1%E6%81%AF%E5%88%B0%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6/">Android调试输出log打印信息到本地文件</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/app%E6%98%AF%E5%90%A6%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C-%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81/">App是否正在运行-运行状态</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E5%9C%A8%E7%BA%BF%E5%9B%BE%E7%89%87%E5%8E%BB%E5%BA%95%E5%B7%A5%E5%85%B7---%E5%B0%86%E7%BA%AF%E8%89%B2%E8%83%8C%E6%99%AF%E7%9A%84%E5%9B%BE%E7%89%87%E8%BD%AC%E6%8D%A2%E4%B8%BA%E8%83%8C%E6%99%AF%E9%80%8F%E6%98%8E%E7%9A%84%E5%9B%BE%E7%89%87/">在线图片去底工具---将纯色背景的图片转换为背景透明的图片</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9C%86%E5%BD%A2%E5%A4%B4%E5%83%8FCircleImageView%E7%9A%84%E4%BD%BF%E7%94%A8/">自定义圆形头像CircleImageView的使用</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-Gps-%E4%BD%8D%E7%BD%AE%E4%BF%A1%E6%81%AF%E5%BC%80%E5%85%B3%E6%A3%80%E6%B5%8B/">Android-Gps-位置信息开关检测</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-eclpse%E5%BF%AB%E6%8D%B7%E9%94%AE%E5%A4%A7%E5%85%A8/">Android-Eclpse快捷键大全</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/java-android-%E9%93%B6%E8%A1%8C%E5%8D%A1%E5%8F%B7%E6%9F%A5%E8%AF%A2%E9%93%B6%E8%A1%8C%E5%8D%A1%E7%B1%BB%E5%9E%8B%E5%8F%8A%E5%90%8D%E7%A7%B0/">Java-Android-银行卡号查询银行卡类型及名称</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-RecyclerView%E5%AE%9E%E7%8E%B0%E6%A8%AA%E5%90%91%E6%BB%91%E5%8A%A8%E7%BF%BB%E9%A1%B5/">Android-RecyclerView实现横向滑动翻页</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/VAPTCHA-ANDROID-SDK%E9%83%A8%E7%BD%B2%E6%96%87%E6%A1%A3/">VAPTCHA-ANDROID-SDK部署文档</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-Jenkins%E8%87%AA%E5%8A%A8%E6%89%93%E5%8C%85/">Android-Jenkins自动打包</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%88%A4%E6%96%ADUrl%E6%A0%BC%E5%BC%8F%E6%98%AF%E5%90%A6%E6%AD%A3%E7%A1%AE/">Android判断Url格式是否正确</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/marktext/">Marktext</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E8%87%AA%E5%88%B6-9%E5%9B%BE%E5%AE%9E%E7%8E%B0%E5%92%8C%E8%AE%BE%E8%AE%A1%E5%9B%BE%E4%B8%80%E8%87%B4%E7%9A%84%E9%98%B4%E5%BD%B1%E6%95%88%E6%9E%9C/">自制-9图实现和设计图一致的阴影效果</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-pcm%E8%BD%AC%E7%A0%81wav/">Android-Pcm转码wav</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E5%B1%8F%E5%B9%95%E7%9A%84%E6%97%8B%E8%BD%AC%E8%A7%92%E5%BA%A6/">Android-获取当前屏幕的旋转角度</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E4%BF%9D%E5%AD%98%E5%9B%BE%E7%89%87%E5%88%B0%E6%9C%AC%E5%9C%B0%E7%9B%B8%E5%86%8C%E5%B9%B6%E5%8F%8A%E6%97%B6%E6%9B%B4%E6%96%B0%E6%98%BE%E7%A4%BA/">Android-保存图片到本地相册并及时更新显示</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E5%A4%9A%E8%AF%AD%E8%A8%80%E5%88%87%E6%8D%A2/">Android-多语言切换</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/adb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">Adb常用命令</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/adb%E9%85%8D%E7%BD%AE/">Adb配置</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%20SildingMenu%EF%BC%88%E4%BE%A7%E6%BB%91%E8%8F%9C%E5%8D%95%EF%BC%89%E5%B8%B8%E7%94%A8%E5%B1%9E%E6%80%A7/">Android SildingMenu（侧滑菜单）常用属性</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%9B%BE%E7%89%87%E6%89%8B%E5%8A%BF%E6%8E%A7%E4%BB%B6/">Android图片手势控件</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/DeBug%E8%B0%83%E8%AF%95/">DeBug调试</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/EditText%E5%BC%B9%E5%87%BA%E9%94%AE%E7%9B%98%E6%97%B6%E6%BB%9A%E5%8A%A8%E5%88%B0%E7%95%8C%E9%9D%A2%E6%8C%87%E5%AE%9A%E4%BD%8D%E7%BD%AE/">EditText弹出键盘时滚动到界面指定位置</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E6%97%A0%E9%9A%9C%E7%A2%8D%E5%8D%87%E7%BA%A7/">无障碍升级</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E5%88%A4%E6%96%AD%E5%BD%93%E5%89%8D%E5%BA%94%E7%94%A8%E6%98%AF%E5%90%A6%E9%80%80%E5%88%B0%E5%90%8E%E5%8F%B0/">判断当前应用是否退到后台</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android日常记录
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Activity%E7%9A%84%E5%9B%9B%E7%A7%8D%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F/">Activity的四种启动模式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android-Elevation/">Android-Elevation</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android-%E6%A0%B9%E6%8D%AE%E9%80%97%E5%8F%B7%E5%88%86%E9%9A%94String/">Android-根据逗号分隔String</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">Android内存管理</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android%E5%B8%B8%E7%94%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">Android常用设计模式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android%E8%87%AA%E5%AE%9A%E4%B9%89View/">Android自定义View</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Anroid-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F/">Anroid-自定义字体样式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/EditText%E4%B8%8D%E8%87%AA%E5%8A%A8%E8%8E%B7%E5%8F%96%E7%84%A6%E7%82%B9/">EditText不自动获取焦点</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/GlidePalette%E8%8E%B7%E5%8F%96%E5%9B%BE%E7%89%87%E8%83%8C%E6%99%AF%E8%89%B2/">GlidePalette获取图片背景色</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Handler/">Handler</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%AE%89%E5%85%A8%E9%80%80%E5%87%BA%E7%BA%BF%E7%A8%8B%E6%96%B9%E6%B3%95/">Java多线程编程安全退出线程方法</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-MultiDex%E5%88%86%E5%8C%85/">Android-MultiDex分包</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-textview%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9%E6%8C%87%E5%AE%9A%E6%96%87%E5%AD%97%E9%A2%9C%E8%89%B2/">Android-Textview动态修改指定文字颜色</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-%E6%A0%B9%E6%8D%AE%E4%B8%89%E7%82%B9%E5%9D%90%E6%A0%87%E6%B1%82%E4%B8%89%E8%A7%92%E5%BD%A2%E9%9D%A2%E7%A7%AF/">Android-根据三点坐标求三角形面积</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-%E8%8B%B1%E6%96%87%E5%8D%95%E8%AF%8D%E5%8D%87%E5%BA%8F%E6%8E%92%E5%BA%8F%EF%BC%88Collections-sort()%EF%BC%89/">Android-英文单词升序排序（Collections-Sort()）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android%E4%B8%AD%E6%9B%B4%E6%96%B0UI%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/">android中更新UI的几种方式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/viewpager%E8%87%AA%E5%AE%9A%E4%B9%89%E6%BB%91%E5%8A%A8%E9%80%9F%E5%BA%A6/">Viewpager自定义滑动速度</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E5%BA%8F%E5%88%97%E5%8C%96%E6%96%B9%E6%A1%88/">数据序列化方案</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/%E7%A8%8B%E5%BA%8F%E5%91%98%E5%BF%85%E7%9F%A5%E7%9A%846%E7%82%B9%E7%BC%96%E7%A8%8B%E7%A7%98%E8%AF%80/">程序员必知的6点编程秘诀</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/%E7%B3%BB%E7%BB%9F%E6%97%A5%E5%8E%86-%E6%8F%92%E5%85%A5%E9%87%8D%E5%A4%8D%E4%BA%8B%E4%BB%B6%E8%A7%84%E5%88%99-(android-java)/">系统日历-插入重复事件规则-(Android-Java)</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android日常问题
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android-9-0-P-http-%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E7%9A%84%E9%97%AE%E9%A2%98/">Android-9-0-P-Http-网络请求的问题</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android-FaceBook%E7%99%BB%E5%BD%95-%E5%88%86%E4%BA%AB%E8%8E%B7%E5%8F%96HashKey%EF%BC%88%E5%AF%86%E9%92%A5%E6%95%A3%E5%88%97%EF%BC%89%E7%9A%84%E7%AE%80%E5%8D%95%E6%96%B9%E6%B3%95/">Android-FaceBook登录-分享获取HashKey（密钥散列）的简单方法</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android-studio-%E7%82%B9%E5%87%BB%E8%BF%90%E8%A1%8C%E6%80%BB%E6%98%AF%E8%BF%9B%E5%85%A5Debug%E6%A8%A1%E5%BC%8F/">Android-Studio-点击运行总是进入Debug模式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android%E8%BF%9B%E7%A8%8B%E4%BF%9D%E6%B4%BB-%E6%81%AF%E5%B1%8F%E5%90%8E%E5%90%8E%E5%8F%B0%E4%BF%9D%E6%8C%81%E5%AE%9A%E4%BD%8D%E3%80%81%E7%BD%91%E7%BB%9C%E8%BF%90%E8%A1%8C/">Android进程保活-息屏后后台保持定位、网络运行</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/DatePickerDialog--setMinDate-setMaxDate%E5%90%8E%E6%A0%87%E9%A2%98%E9%9A%8F%E7%9D%80%E5%8F%98%E5%8C%96-%EF%BC%88%E5%8E%BB%E6%8E%89%E6%A0%87%E9%A2%98%EF%BC%89/">DatePickerDialog--setMinDate-setMaxDate后标题随着变化-（去掉标题）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/recyclerview-smoothScrollToPosition()%E5%B9%B3%E6%BB%91%E5%A4%B1%E6%95%88-%E6%9C%AA%E8%B5%B7%E6%95%88%E6%9E%9C/">Recyclerview-smoothScrollToPosition()平滑失效-未起效果</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/%E8%BD%AF%E9%94%AE%E7%9B%98%E5%BC%B9%E5%87%BA%E5%90%8E%E5%B8%83%E5%B1%80%E4%B8%8A%E7%A7%BB/">软键盘弹出后布局上移</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/studio%E6%8F%92%E4%BB%B6%E4%B8%8B%E8%BD%BD%E6%85%A2%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/">Studio插件下载慢解决方法</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Material-Design新控件
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/AppbarLayout/">AppbarLayout</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/Chronometer%E8%AE%A1%E6%97%B6%E5%99%A8/">Chronometer计时器</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/FloatingActionButton(%E6%82%AC%E6%B5%AE%E6%8C%89%E9%92%AE)/">FloatingActionButton(悬浮按钮)</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/Snackbar/">Snackbar</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/SwitchCompat/">SwitchCompat</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/TabLayout/">TabLayout</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/TextInputLayout/">TextInputLayout</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            android-https双向验证
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/Glide-okhttps%E8%AF%81%E4%B9%A6%E9%AA%8C%E8%AF%81%E5%85%A8%E5%B1%80%E9%85%8D%E7%BD%AE/">Glide-Okhttps证书验证全局配置</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/P12%E8%AF%81%E4%B9%A6%E8%BD%ACBKS%E8%AF%81%E4%B9%A6/">P12证书转BKS证书</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81-%E6%80%BB%E7%BB%93/">Android-Https双向验证-总结</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-okhttps%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/">Android-Okhttps双向验证</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-webView%E7%9A%84%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/">Android-webView的双向验证</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-%E5%8D%95%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81%E7%9F%A5%E8%AF%86%E7%82%B9/">Android-单双向验证知识点</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android%E8%8E%B7%E5%8F%96%E8%AF%81%E4%B9%A6%E6%96%87%E4%BB%B6/">Android获取证书文件</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/https%E5%8F%8C%E5%90%91%E8%AE%A4%E8%AF%81%E8%AF%81%E4%B9%A6%E7%94%9F%E6%88%90/">Https双向认证证书生成</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/phpstudy%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E6%9C%8D%E5%8A%A1%E5%99%A8/">Phpstudy搭建本地服务器</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/%E9%85%8D%E7%BD%AE%E5%AE%8C%E6%88%90%E5%90%8E%E7%9A%84%E6%B5%8B%E8%AF%95/">配置完成后的测试</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            android-加密-解密-数据压缩
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/android-%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86-%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/android-%E5%8E%9F%E7%94%9Fbase64/">Android-原生Base64</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86-%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/10%E8%BF%9B%E5%88%B6%E8%BD%AC20%E8%BF%9B%E5%88%B6%EF%BC%88%E4%BB%BB%E6%84%8F%E8%BF%9B%E5%88%B6-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AD%97%E7%AC%A6%EF%BC%89/">10进制转20进制（任意进制-自定义字符）</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86-%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/%E5%8E%8B%E7%BC%A9%E7%AE%97%E6%B3%95%E8%BF%9B%E8%A1%8C%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8E%8B%E7%BC%A9/">压缩算法进行字符串压缩</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            rxjava2
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/rxjava2/Rxjava2%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">Rxjava2的基本使用</a></li>  <li class="file"><a href="/wiki/Android%20Application/rxjava2/rxjava2%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">Rxjava2基本概念</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+                    </li> 
+                    
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            Android FrameWork
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            Framework源码分析
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            Android 13
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            InPutManagerService
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file active"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/3.InputReader%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/">3.InputReader事件处理</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/1.InputFlinger%E7%9A%84%E5%90%AF%E5%8A%A8/">1.InputFlinger的启动</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/2.EventHub%E8%8E%B7%E5%8F%96%E4%BA%8B%E4%BB%B6/">2.EventHub获取事件</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/4.InputDispatcher%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/">4.InputDispatcher事件分发</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/5.%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E5%9C%A8%E5%BA%94%E7%94%A8%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%88%86%E5%8F%91%E5%92%8C%E5%A4%84%E7%90%86/">5.触摸事件在应用进程的分发和处理</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            WMSAMS
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/1.%E7%AA%97%E5%8F%A3%E5%B1%82%E7%BA%A7%20_%E5%AE%B9%E5%99%A8%E7%B1%BB/">1.窗口层级 _容器类</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/2.%E7%AA%97%E5%8F%A3%E5%B1%82%E7%BA%A7%20_%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84%E6%A0%91%E7%9A%84%E6%9E%84%E5%BB%BA/">2.窗口层级 _层级结构树的构建</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/3.%E7%AA%97%E5%8F%A3%E5%B1%82%E7%BA%A7_%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84%E6%A0%91%E6%B7%BB%E5%8A%A0%E7%AA%97%E5%8F%A3/">3.窗口层级_层级结构树添加窗口</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/4.WMS%E7%AA%97%E5%8F%A3%E7%9B%B8%E5%85%B3%E6%B5%81%E7%A8%8B/"></a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/1.android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BSeLinux%E6%9D%83%E9%99%90%E4%BB%8B%E7%BB%8D/">1.Android13启动流程之SeLinux权限介绍.md</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/2.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BFirstStageMain%E9%98%B6%E6%AE%B5/">2.Android13启动流程之FirstStageMain阶段</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/3.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BSecondStageMain%E9%98%B6%E6%AE%B5/">3.Android13启动流程之SecondStageMain阶段</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/4.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BZygote%E5%92%8CSystemServer%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">4.Android13启动流程之Zygote和SystemServer启动流程</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/5.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BSystemServer%E5%86%85%E9%83%A8%E9%80%BB%E8%BE%91%E5%88%86%E6%9E%90/">5.android13启动流程之SystemServer内部逻辑分析.md</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/6.PowerManagerService%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%92%8C%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95/">6.PowerManagerService启动流程和核心方法</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/7.%E7%82%B9%E5%87%BB%E6%A1%8C%E9%9D%A2APP%E5%9B%BE%E6%A0%87%EF%BC%8C%E5%88%B0APP%E7%95%8C%E9%9D%A2%E6%98%BE%E7%A4%BA%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90(%E4%B8%80)/">7.点击桌面APP图标，到APP界面显示流程分析</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/8.%E7%82%B9%E5%87%BB%E6%A1%8C%E9%9D%A2APP%E5%9B%BE%E6%A0%87%EF%BC%8C%E5%88%B0APP%E7%95%8C%E9%9D%A2%E6%98%BE%E7%A4%BA%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90(%E4%BA%8C)/">8.点击桌面APP图标，到APP界面显示流程分析(二)</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Framework相关
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/1.Handler%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">Handler消息机制原理解析</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/2.Binder%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">Binder原理解析</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/ANR%E7%9A%84%E4%BA%A7%E7%94%9F%E6%9C%BA%E5%88%B6/">ANR的产生机制</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/SystemUI/">SystemUI</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/Android%20FrameWork/LINUX%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4/">LINUX基础命令</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/VIM%E4%BD%BF%E7%94%A8/">VIM使用</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/adb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">Adb常用命令</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1/">自定义服务</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/%E4%BD%BF%E7%94%A8%20git%20add%20-p%20%E6%95%B4%E7%90%86%20patch/">使用Git Add -P 整理 Patch</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/dumpsys%E5%91%BD%E4%BB%A4%E7%94%A8%E6%B3%95/">Dumpsys命令用法</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/AOSP%20Repo%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99/">AOSP Repo 命令参考资料</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/ADB%E5%92%8CMonkey%E6%B5%8B%E8%AF%95/">ADB和Monkey测试</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/AOSP%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">AOSP常用编译和查找命令文件</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Eclipse%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/">Eclipse安装教程</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Windows%E5%92%8CUbuntu%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85/">Windows和Ubuntu双系统安装</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Android%20%E6%BA%90%E7%A0%81%E6%A0%B9%E7%9B%AE%E5%BD%95%E4%BB%8B%E7%BB%8D/">Android源码根目录介绍</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98/">Framework遇到的问题</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/%E5%AF%BC%E5%85%A5%E7%B3%BB%E7%BB%9F%E6%BA%90%E7%A0%81%E5%88%B0Studio/">导入系统源码到Studio</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Linux%20%E8%AE%BE%E7%BD%AEswap/">Linux设置swap</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/wine%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8/">Wine安装及使用</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Selinux&SeAndroid/">Selinux&SeAndroid</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/rc%E6%96%87%E4%BB%B6%E8%AF%AD%E6%B3%95%E8%A7%84%E5%88%99/">Rc文件语法规则</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/ASFP%20(android%20studio%20for%20platform)%E4%BD%BF%E7%94%A8/">ASFP (Android Studio for Platform)使用</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android进阶
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Jetpack
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/Jetpack%E6%9E%B6%E6%9E%84%E7%BB%84%E4%BB%B6%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%B2%BE%E9%80%9A/">Jetpack架构组件从入门到精通</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/1.LifeCycle/">1.LifeCycle</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/2.LiveData/">2.LiveData</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/3.DataBinding/">3.DataBinding</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/4.Dagger2/">4.Dagger2</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/5.ViewModle/">5.ViewModle</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/6.Room/">6.Room</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/7.Hilt/">7.Hilt</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/8.Paging/">8.Paging</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/9.WorkManager/">9.WorkManager</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/10.Navigation/">10.Navigation</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            NDK
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android进阶之旅
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/12_makefile/">12_makefile</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/16_1_Cmake%E8%AF%AD%E6%B3%95/">16_1_Cmake语法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/16_2_Cmake%E9%A1%B9%E7%9B%AE%E5%B8%B8%E7%94%A8/">16_2_Cmake项目常用</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/19_NDK%E9%9D%A2%E8%AF%95%E9%A2%98/">19_NDK面试题</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/11_%E7%BC%96%E8%AF%91%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E5%8E%9F%E7%90%86/">11_编译流程详解/静态库与动态库原理.md</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/13_android.mk/">13_android.mk</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/14_Application.mk/">14_Application.mk</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/15_Android.mk%E5%92%8CAndroid.bp%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB/">15_Android.mk和Android.bp对应关系.md</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/17_Shell%E8%84%9A%E6%9C%AC/">17_Shell脚本</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/18_NDK%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/">18_NDK环境配置</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/1_c%E5%9F%BA%E7%A1%80/">1_c基础</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/3_jni_native%E5%B1%82%E6%9E%84%E5%BB%BAjava%E5%AF%B9%E8%B1%A1/">3_jni_native层构建java对象</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/2_jni%E5%9F%BA%E7%A1%80/"></a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/4_jni_%E6%95%B0%E7%BB%84%E7%9A%84%E7%BB%86%E8%8A%82%E5%A4%84%E7%90%86/">4_jni_数组的细节处理</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/5_c%E8%BF%9B%E9%98%B6_%E5%86%85%E5%AD%98%E5%9B%9B%E9%A9%B1%E6%A8%A1%E5%9E%8B/">5_c进阶_内存四驱模型</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/7_%E9%93%B6%E8%A1%8C%E5%8D%A1%E8%AF%86%E5%88%AB/">7_银行卡识别.md</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/6_c++%E5%9F%BA%E7%A1%80/">6_c++基础</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/8_%E7%AE%97%E6%B3%95/">8_算法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/9_%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80/">9_音视频基础</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/20.jni%E6%96%B9%E6%B3%95%E5%A4%A7%E5%85%A8%E5%8F%8A%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/">20.jni方法大全及使用示例</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            蒋超大佬扫盲
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/1.%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">1.基础知识</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/CMake%E8%AF%AD%E6%B3%95/">CMake语法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/2.Cmake%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">2.Cmake基础知识</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/3.JNI%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/">3.JNI数据类型</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/4.JavaVM/">JavaVM</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/5.OPUS%E7%BC%96%E8%AF%91/">5.opus编译</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/6.libusb/">6.libusb</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/7.mmkv%E7%BC%96%E8%AF%91/">7.mmkv编译</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/8.mqtt/">8.mqtt</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/9.%E5%87%BD%E6%95%B0%E7%AD%BE%E5%90%8D%E5%8F%8Andk%E8%B0%83%E7%94%A8java%E6%96%B9%E6%B3%95/">9.函数签名及ndk调用java方法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/10.%E7%BA%BF%E7%A8%8B/">10.线程</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            性能优化
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/leakcanary%E7%9A%84%E4%BD%BF%E7%94%A8/">Leakcanary的使用</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/1.App%E6%80%A7%E8%83%BD%E6%A6%82%E8%A7%88%E4%B8%8E%E5%B9%B3%E5%8F%B0%E5%8C%96%E5%AE%9E%E8%B7%B5/">1.App性能概览与平台化实践</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/2.App%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96/">2.App启动优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/3.%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/">3.内存优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/4.%E5%B8%83%E5%B1%80%E4%BC%98%E5%8C%96/">4.布局优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/5.%E5%8D%A1%E9%A1%BF%E4%BC%98%E5%8C%96/">5.卡顿优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/6.%E7%BA%BF%E7%A8%8B%E4%BC%98%E5%8C%96/">6.线程优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/7.%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/">7.网络优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/8.%E7%94%B5%E9%87%8F%E4%BC%98%E5%8C%96/">8.电量优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/9.%E7%98%A6%E8%BA%AB%E4%BC%98%E5%8C%96/">9.瘦身优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/10.%E7%A8%B3%E5%AE%9A%E6%80%A7%E4%BC%98%E5%8C%96/">10.稳定性优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/11.%E4%B8%93%E9%A1%B9%E6%8A%80%E6%9C%AF%E4%BC%98%E5%8C%96/">11.专项技术优化</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/java%20%E5%8F%8D%E5%B0%84%E5%8F%8A%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/">Java 反射及代理模式初步学习</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E5%BA%93Retrofit/">网络请求库Retrofit</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            C++
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            C++教程从0到1入门编程
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/C++/C++%E6%95%99%E7%A8%8B%E4%BB%8E0%E5%88%B01%E5%85%A5%E9%97%A8%E7%BC%96%E7%A8%8B/1.C++%E5%9F%BA%E7%A1%80/">C++基础</a></li>  <li class="file"><a href="/wiki/C++/C++%E6%95%99%E7%A8%8B%E4%BB%8E0%E5%88%B01%E5%85%A5%E9%97%A8%E7%BC%96%E7%A8%8B/2.C++%E6%8F%90%E9%AB%98/">C++提高</a></li>  <li class="file"><a href="/wiki/C++/C++%E6%95%99%E7%A8%8B%E4%BB%8E0%E5%88%B01%E5%85%A5%E9%97%A8%E7%BC%96%E7%A8%8B/3.C++%E6%A0%B8%E5%BF%83/">C++核心</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/C++/window%E7%B3%BB%E7%BB%9F_vscode%E4%B8%AD%E9%85%8D%E7%BD%AE%20c++%E7%8E%AF%E5%A2%83/">Vscode中配置 C++环境</a></li>  <li class="file"><a href="/wiki/C++/%E8%BD%BB%E6%9D%BE%E6%90%9E%E5%AE%9AC++%E8%AF%AD%E8%A8%80/">轻松搞定C++语言</a></li>  <li class="file"><a href="/wiki/C++/%E8%BD%BB%E6%9D%BE%E6%90%9E%E5%AE%9AC%E8%AF%AD%E8%A8%80(%E6%8F%90%E9%AB%98%E7%AF%87)/">轻松搞定C语言(提高篇)</a></li>  <li class="file"><a href="/wiki/C++/%E5%BD%BB%E5%BA%95%E6%90%9E%E5%AE%9AC%E6%8C%87%E9%92%88/">彻底搞定C指针</a></li>  <li class="file"><a href="/wiki/C++/Linux%E7%B3%BB%E7%BB%9F_vscode%E4%B8%AD%E9%85%8D%E7%BD%AE%20c++%E7%8E%AF%E5%A2%83/">Linux系统_vscode中配置 c++环境.md</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            其他笔记
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Flutter
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Android-Studio%E9%85%8D%E7%BD%AEFlutter/">Android-Studio配置Flutter</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter(Android-%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/">Flutter(Android-混合开发)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter-Decoration%E8%83%8C%E6%99%AF%E8%AE%BE%E5%AE%9A%EF%BC%88%E8%BE%B9%E6%A1%86%E3%80%81%E5%9C%86%E8%A7%92%E3%80%81%E9%98%B4%E5%BD%B1%E3%80%81%E5%BD%A2%E7%8A%B6%E3%80%81%E6%B8%90%E5%8F%98%E3%80%81%E8%83%8C%E6%99%AF%E5%9B%BE%E5%83%8F%E7%AD%89%EF%BC%89/">Flutter-Decoration背景设定（边框、圆角、阴影、形状、渐变、背景图像等）</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter-%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E5%92%8C%E9%A1%B9%E7%9B%AE%E8%B5%84%E6%BA%90/">Flutter-目录结构和项目资源</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter%E4%B8%AD%E7%9A%84%E6%89%8B%E5%8A%BF%E5%A4%84%E7%90%86/">Flutter中的手势处理</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter%E4%B9%8BScaffold/">Flutter之Scaffold</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter-%E6%8E%A7%E4%BB%B6%E4%B9%8B-MaterialApp/">Flutter-控件之-MaterialApp</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter%E4%BB%A3%E7%A0%81%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/">Flutter代码开发规范</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/StatelessWidget%E5%92%8CStatefulWidget%E7%9A%84%E5%8C%BA%E5%88%AB/">StatelessWidget和StatefulWidget的区别</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-BottomAppBar-%EF%BC%88%E4%B8%8D%E8%A7%84%E5%88%99%E5%BA%95%E9%83%A8%E5%B7%A5%E5%85%B7%E6%A0%8F%EF%BC%89/">Flutter-BottomAppBar-（不规则底部工具栏）</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-BottomNavigationBar%E7%B1%BB/">Flutter-BottomNavigationBar类</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Chip/">Flutter-Chip</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-ExpansionTile(%E9%97%AD%E5%90%88%E5%88%97%E8%A1%A8)/">Flutter-ExpansionTile(闭合列表)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Flexible%E5%92%8C-Expanded/">Flutter-Flexible和-Expanded</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-ListTile(06)/">Flutter-ListTile(06)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Padding/">Flutter-Padding</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Stack(%E5%B1%82%E5%8F%A0%E6%8E%A7%E4%BB%B6)/">Flutter-Stack(层叠控件)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Text(02)/">Flutter-Text(02)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-card%EF%BC%88%E5%8D%A1%E7%89%87%E5%B8%83%E5%B1%80%EF%BC%89/">Flutter-Card（卡片布局）</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-gridView/">Flutter-gridView</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-listview(07)/">Flutter-Listview(07)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-mainAxisAlignment%E5%92%8CcrossAxisAlignment/">Flutter-mainAxisAlignment和crossAxisAlignment</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%8D%95%E9%80%89%E6%A1%86%E5%92%8C%E5%A4%8D%E9%80%89%E6%A1%86(05)/">Flutter-单选框和复选框(05)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%9B%BE%E7%89%87(04)/">Flutter-图片(04)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%AF%BC%E8%88%AA%E8%BF%94%E5%9B%9E%E6%8B%A6%E6%88%AAWillPopScope(%E9%98%B2%E8%AF%AF%E8%A7%A6)/">Flutter-导航返回拦截WillPopScope(防误触)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%B1%82%E5%8F%A0%E5%B8%83%E5%B1%80Stack%E3%80%81Positioned/">Flutter-层叠布局Stack、Positioned</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%BC%B9%E6%80%A7%E5%B8%83%E5%B1%80Flex/">Flutter-弹性布局Flex</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E6%8C%89%E9%92%AE(03)/">Flutter-按钮(03)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E6%B5%81%E5%BC%8F%E5%B8%83%E5%B1%80Wrap%E3%80%81Flow/">Flutter-流式布局Wrap、Flow</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E7%BA%BF%E6%80%A7%E5%B8%83%E5%B1%80Row%E5%92%8CColumn-1/">Flutter-线性布局Row和Column-1</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E7%BA%BF%E6%80%A7%E5%B8%83%E5%B1%80Row%E5%92%8CColumn/">Flutter-线性布局Row和Column</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E8%BE%93%E5%85%A5%E6%A1%86%E5%92%8C%E6%A0%87%E7%82%B9/">Flutter-输入框和标点</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E9%A2%9C%E8%89%B2%E6%B8%90%E5%8F%98/">Flutter-颜色渐变</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8(01)/">Flutter基础使用(01)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter%E7%AE%80%E4%BB%8B/">Flutter简介</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            QT
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/QT/QT-Creator%E5%AE%89%E8%A3%85/">QT-Creator安装</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            svn配置及使用
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E4%B8%8B%E8%BD%BD%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93/">Svn下载远程仓库</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/">Svn客户端安装和配置</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/">Svn服务端安装和配置</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/">Svn的基本操作</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/win11%E8%87%AA%E5%8A%A8%E5%85%B3%E6%9C%BA/">Win11自动关机</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/%E6%88%91%E7%9A%84%E7%AE%80%E5%8E%86/">我的简历</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/csdn%E6%96%87%E7%AB%A0%E5%AF%BC%E5%87%BAmarkdown/">Csdn文章导出到本地markdown</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+    </div>
+    <script>
+        $(document).ready(function() {
+            var iconFolderOpenClass  = 'fa-folder-open';
+            var iconFolderCloseClass = 'fa-folder';
+            var iconAllExpandClass = 'fa-angle-double-down';
+            var iconAllPackClass = 'fa-angle-double-up';
+            // Handle directory-tree expansion:
+            // 左键单独展开目录
+            $(document).on('click', '#categories a[data-role="directory"]', function (event) {
+                event.preventDefault();
+
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var subtree = $(this).siblings('ul');
+                icon.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if (expanded) {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideUp({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderCloseClass);
+                } else {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideDown({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderOpenClass);
+                }
+            });
+            // 右键展开下属所有目录
+            $('#categories a[data-role="directory"]').bind("contextmenu", function(event){
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var listNode = $(this).siblings('ul');
+                var subtrees = $.merge(listNode.find('li ul'), listNode);
+                var icons = $.merge(listNode.find('.fa'), icon);
+                icons.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if(expanded) {
+                    subtrees.slideUp({ duration: 100 });
+                    icons.addClass(iconFolderCloseClass);
+                } else {
+                    subtrees.slideDown({ duration: 100 });
+                    icons.addClass(iconFolderOpenClass);
+                }
+            })
+            // 展开关闭所有目录按钮
+            $(document).on('click', '#allExpand', function (event) {
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconAllExpandClass);
+                icon.removeClass(iconAllExpandClass).removeClass(iconAllPackClass);
+                if(expanded) {
+                    $('#sidebar .fa.fa-folder').removeClass('fa-folder').addClass('fa-folder-open')
+                    $('#categories li ul').slideDown({ duration: 100 });
+                    icon.addClass(iconAllPackClass);
+                } else {
+                    $('#sidebar .fa.fa-folder-open').removeClass('fa-folder-open').addClass('fa-folder')
+                    $('#categories li ul').slideUp({ duration: 100 });
+                    icon.addClass(iconAllExpandClass);
+                }
+            });  
+        });
+    </script>
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+            <section id="main"><article id="post-Android FrameWork/Framework源码分析/Android 13/InPutManagerService/3.InputReader事件处理" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+                    <div class="article-meta">
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/Android-FrameWork/">Android FrameWork</a><i class="fa fa-angle-right"></i><a class="article-category-link" href="/categories/Android-FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">Framework源码分析</a><i class="fa fa-angle-right"></i><a class="article-category-link" href="/categories/Android-FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android-13/">Android 13</a><i class="fa fa-angle-right"></i><a class="article-category-link" href="/categories/Android-FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android-13/InPutManagerService/">InPutManagerService</a>
+    </div>
+
+                        
+                        
+  
+
+
+
+                        
+                        
+                    </div>
+                
+                
+   
+
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+        
+            
+        
+        
+            <p>####回顾</p>
+<p>从前面的InputFlinger的启动可知，InputReader线程启动后会循环执行loopOnce()方法，然后阻塞在<code>getEvents</code>等待事件的上报，这里就从loopOnce获取到事件被唤醒后来分析InputReader对事件的处理。</p>
+<h4 id="InputReader-loopOnce"><a href="#InputReader-loopOnce" class="headerlink" title="InputReader::loopOnce()"></a>InputReader::loopOnce()</h4><p>frameworks&#x2F;native&#x2F;services&#x2F;inputflinger&#x2F;reader&#x2F;InputReader.cpp</p>
+<pre><code>void InputReader::loopOnce() &#123;
+    int32_t oldGeneration;
+    int32_t timeoutMillis;
+    bool inputDevicesChanged = false;
+    std::vector&lt;InputDeviceInfo&gt; inputDevices;
+    
+    ...
+    //从EventHub中读取事件
+    size_t count = mEventHub-&gt;getEvents(timeoutMillis, mEventBuffer, EVENT_BUFFER_SIZE);
+        
+    &#123; // acquire lock
+        ...
+        if (count) &#123;
+            //处理事件
+            processEventsLocked(mEventBuffer, count);
+        &#125;
+        ...
+        
+    &#125; // release lock
+
+    // Send out a message that the describes the changed input devices.
+    //如果输入设备状态改变则通过回调通知java层
+    if (inputDevicesChanged) &#123;
+        mPolicy-&gt;notifyInputDevicesChanged(inputDevices);
+    &#125;
+
+    // Flush queued events out to the listener.
+    mQueuedListener.flush();
+&#125;
+</code></pre>
+<h3 id="一、处理事件"><a href="#一、处理事件" class="headerlink" title="一、处理事件"></a>一、处理事件</h3><h4 id="InputReader-processEventsLocked"><a href="#InputReader-processEventsLocked" class="headerlink" title="InputReader::processEventsLocked"></a>InputReader::processEventsLocked</h4><pre><code>void InputReader::processEventsLocked(const RawEvent* rawEvents, size_t count) &#123;
+    for (const RawEvent* rawEvent = rawEvents; count;) &#123;
+        int32_t type = rawEvent-&gt;type;
+        size_t batchSize = 1;
+        //除了设备添加、移除、结束扫描事件之外的普通事件采用批处理方式方式处理
+        if (type &lt; EventHubInterface::FIRST_SYNTHETIC_EVENT) &#123;
+            int32_t deviceId = rawEvent-&gt;deviceId;
+            while (batchSize &lt; count) &#123;
+                //如果出现不符合批处理的事件（一般上面的判断已经足够）则退出本次事件流程
+                if (rawEvent[batchSize].type &gt;= EventHubInterface::FIRST_SYNTHETIC_EVENT ||
+                    rawEvent[batchSize].deviceId != deviceId) &#123;
+                    break;
+                &#125;
+                batchSize += 1;
+            &#125;
+            //处理普通事件（批量处理）
+            processEventsForDeviceLocked(deviceId, rawEvent, batchSize);
+        &#125; else &#123;
+            switch (rawEvent-&gt;type) &#123;
+                //如果是设备添加事件
+                case EventHubInterface::DEVICE_ADDED:
+                    //添加设备主要就是创建设备对应的inputDevice
+                    //通过设备的class类型创建对应的mapper
+                    //将对应的mapper和EventHub、inputReader关联（InputDeviceContext）
+                    //然后将对应的deviceId、mapper、InputDeviceContext加入inputDevice容器中
+                    addDeviceLocked(rawEvent-&gt;when, rawEvent-&gt;deviceId);
+                    break;
+                //如果是设备移除事件
+                case EventHubInterface::DEVICE_REMOVED:
+                    removeDeviceLocked(rawEvent-&gt;when, rawEvent-&gt;deviceId);
+                    break;
+                //如果是设备结束扫描事件
+                case EventHubInterface::FINISHED_DEVICE_SCAN:
+                    handleConfigurationChangedLocked(rawEvent-&gt;when);
+                    break;
+                default:
+                    ALOG_ASSERT(false); // can&#39;t happen
+                    break;
+            &#125;
+        &#125;
+        count -= batchSize;
+        rawEvent += batchSize;
+    &#125;
+&#125;
+</code></pre>
+<h4 id="InputReader-processEventsForDeviceLocked"><a href="#InputReader-processEventsForDeviceLocked" class="headerlink" title="InputReader::processEventsForDeviceLocked"></a>InputReader::processEventsForDeviceLocked</h4><pre><code>void InputReader::processEventsForDeviceLocked(int32_t eventHubId, const RawEvent* rawEvents,
+                                               size_t count) &#123;
+    auto deviceIt = mDevices.find(eventHubId);  //通过device id找到事件对应的inputDevice对象
+    ...
+    device-&gt;process(rawEvents, count);  //调用事件对应的inputDevice对象process处理当前事件
+&#125;
+</code></pre>
+<h4 id="InputDevice-process"><a href="#InputDevice-process" class="headerlink" title="InputDevice::process"></a>InputDevice::process</h4><p>frameworks&#x2F;native&#x2F;services&#x2F;inputflinger&#x2F;reader&#x2F;InputDevice.cpp</p>
+<pre><code>void InputDevice::process(const RawEvent* rawEvents, size_t count) &#123;
+    //按顺序分发给对应的mapper处理，要求事件按照时间顺序处理
+    for (const RawEvent* rawEvent = rawEvents; count != 0; rawEvent++) &#123;
+
+        if (mDropUntilNextSync) &#123;  //抛弃下一个SYN事件前的所有事件
+            ...
+        &#125; else if (rawEvent-&gt;type == EV_SYN &amp;&amp; rawEvent-&gt;code == SYN_DROPPED) &#123;
+            ...
+        &#125; else &#123;  //正常走这里
+            //通过deviceId查询mDevices中对应的mapper（这个是在设备add事件时添加的）
+            for_each_mapper_in_subdevice(rawEvent-&gt;deviceId, [rawEvent](InputMapper&amp; mapper) &#123;
+                mapper.process(rawEvent);
+            &#125;);
+        &#125;
+        --count;
+    &#125;
+&#125;
+</code></pre>
+<h4 id="for-each-mapper-in-subdevice"><a href="#for-each-mapper-in-subdevice" class="headerlink" title="for_each_mapper_in_subdevice"></a>for_each_mapper_in_subdevice</h4><p>frameworks&#x2F;native&#x2F;services&#x2F;inputflinger&#x2F;reader&#x2F;include&#x2F;InputDevice.h</p>
+<pre><code>    // run a function against every mapper on a specific subdevice
+    inline void for_each_mapper_in_subdevice(int32_t eventHubDevice,
+                                             std::function&lt;void(InputMapper&amp;)&gt; f) &#123;
+        auto deviceIt = mDevices.find(eventHubDevice);
+        if (deviceIt != mDevices.end()) &#123;
+            auto&amp; devicePair = deviceIt-&gt;second;
+            auto&amp; mappers = devicePair.second;
+            for (auto&amp; mapperPtr : mappers) &#123;
+                f(*mapperPtr);
+            &#125;
+        &#125;
+    &#125;
+</code></pre>
+<p>通过<code>rawEvent-&gt;deviceId</code>来查询这个事件对应的设备在<code>设备add事件</code>时添加的<code>mapper</code>，这个<code>mapper</code>是根据<code>device</code>的<code>class类型</code>来决定的</p>
+<h4 id="MultiTouchInputMapper-process"><a href="#MultiTouchInputMapper-process" class="headerlink" title="MultiTouchInputMapper::process"></a>MultiTouchInputMapper::process</h4><p>在<code>InputReader::addDeviceLocked</code>中可以知道触摸现在走的是<code>MultiTouchInputMapper</code><br>frameworks&#x2F;native&#x2F;services&#x2F;inputflinger&#x2F;reader&#x2F;mapper&#x2F;MultiTouchInputMapper.cpp</p>
+<pre><code>void MultiTouchInputMapper::process(const RawEvent* rawEvent) &#123;
+    TouchInputMapper::process(rawEvent);
+    //处理常规触摸EV_ABS事件，包括多指情况（多个slot）
+    mMultiTouchMotionAccumulator.process(rawEvent);
+&#125;
+
+void TouchInputMapper::process(const RawEvent* rawEvent) &#123;
+    mCursorButtonAccumulator.process(rawEvent);  //如果是光标按键事件，一般不是
+    mCursorScrollAccumulator.process(rawEvent);  //如果是光标滚动事件，一般不是
+    mTouchButtonAccumulator.process(rawEvent);   //如果是触摸按键事件，（手写笔有时有）
+
+    //只有当收到一次EV_SYN事件上上报本次触摸的事件集
+    if (rawEvent-&gt;type == EV_SYN &amp;&amp; rawEvent-&gt;code == SYN_REPORT) &#123;
+        sync(rawEvent-&gt;when, rawEvent-&gt;readTime);
+    &#125;
+&#125;
+    
+void MultiTouchMotionAccumulator::process(const RawEvent* rawEvent) &#123;
+    if (rawEvent-&gt;type == EV_ABS) &#123;
+        bool newSlot = false;
+        if (mUsingSlotsProtocol) &#123;  //如果支持多指触摸协议
+            if (rawEvent-&gt;code == ABS_MT_SLOT) &#123;
+                mCurrentSlot = rawEvent-&gt;value;
+                newSlot = true;
+            &#125;
+        &#125; else if (mCurrentSlot &lt; 0) &#123;
+            mCurrentSlot = 0;
+        &#125;
+
+        if (mCurrentSlot &lt; 0 || size_t(mCurrentSlot) &gt;= mSlotCount) &#123;
+            ...
+        &#125; else &#123;
+            Slot* slot = &amp;mSlots[mCurrentSlot];
+            // If mUsingSlotsProtocol is true, it means the raw pointer has axis info of
+            // ABS_MT_TRACKING_ID and ABS_MT_SLOT, so driver should send a valid trackingId while
+            // updating the slot.
+            //如果支持多指触摸协议，那么驱动就需要上报有效的trackingId来给上层区分
+            if (!mUsingSlotsProtocol) &#123;
+                slot-&gt;mInUse = true;
+            &#125;
+            //根据事件的code来更新slot的信息
+            switch (rawEvent-&gt;code) &#123;
+                case ABS_MT_POSITION_X:
+                    slot-&gt;mAbsMTPositionX = rawEvent-&gt;value;
+                    warnIfNotInUse(*rawEvent, *slot);
+                    break;
+                case ABS_MT_POSITION_Y:
+                    slot-&gt;mAbsMTPositionY = rawEvent-&gt;value;
+                    warnIfNotInUse(*rawEvent, *slot);
+                    break;
+                case ABS_MT_TOUCH_MAJOR:
+                    slot-&gt;mAbsMTTouchMajor = rawEvent-&gt;value;
+                    break;
+                case ABS_MT_TOUCH_MINOR:
+                    slot-&gt;mAbsMTTouchMinor = rawEvent-&gt;value;
+                    slot-&gt;mHaveAbsMTTouchMinor = true;
+                    break;
+                case ABS_MT_WIDTH_MAJOR:
+                    slot-&gt;mAbsMTWidthMajor = rawEvent-&gt;value;
+                    break;
+                case ABS_MT_WIDTH_MINOR:
+                    slot-&gt;mAbsMTWidthMinor = rawEvent-&gt;value;
+                    slot-&gt;mHaveAbsMTWidthMinor = true;
+                    break;
+                case ABS_MT_ORIENTATION:
+                    slot-&gt;mAbsMTOrientation = rawEvent-&gt;value;
+                    break;
+                case ABS_MT_TRACKING_ID:
+                    if (mUsingSlotsProtocol &amp;&amp; rawEvent-&gt;value &lt; 0) &#123;
+                        // The slot is no longer in use but it retains its previous contents,
+                        // which may be reused for subsequent touches.
+                        slot-&gt;mInUse = false;
+                    &#125; else &#123;
+                        slot-&gt;mInUse = true;
+                        slot-&gt;mAbsMTTrackingId = rawEvent-&gt;value;
+                    &#125;
+                    break;
+                case ABS_MT_PRESSURE:
+                    slot-&gt;mAbsMTPressure = rawEvent-&gt;value;
+                    break;
+                case ABS_MT_DISTANCE:
+                    slot-&gt;mAbsMTDistance = rawEvent-&gt;value;
+                    break;
+                case ABS_MT_TOOL_TYPE:
+                    slot-&gt;mAbsMTToolType = rawEvent-&gt;value;
+                    slot-&gt;mHaveAbsMTToolType = true;
+                    break;
+            &#125;
+        &#125;
+    &#125; else if (rawEvent-&gt;type == EV_SYN &amp;&amp; rawEvent-&gt;code == SYN_MT_REPORT) &#123;
+        // MultiTouch Sync: The driver has returned all data for *one* of the pointers.
+        mCurrentSlot += 1;
+    &#125;
+&#125;
+</code></pre>
+<h4 id="TouchInputMapper-sync"><a href="#TouchInputMapper-sync" class="headerlink" title="TouchInputMapper::sync"></a>TouchInputMapper::sync</h4><pre><code>void TouchInputMapper::sync(nsecs_t when, nsecs_t readTime) &#123;
+    //创建一个RawState并加入mRawStatesPending列表
+    // Push a new state.
+    mRawStatesPending.emplace_back();
+    //初始化上面的RawState, 将相关的各个mapper.process()中记录的事件的属性写入（sync）
+    RawState&amp; next = mRawStatesPending.back();
+    next.clear();
+    next.when = when;
+    next.readTime = readTime;
+    ...
+    // Sync touch
+    //同步触摸的状态，这里是调用子类MultiTouchInputMapper的实现，将子类的process中赋值的多指触摸相关属性赋值给next
+    syncTouch(when, &amp;next);
+
+    // The last RawState is the actually second to last, since we just added a new state
+    const RawState&amp; last =
+            mRawStatesPending.size() == 1 ? mCurrentRawState : mRawStatesPending.rbegin()[1];
+
+    ...
+
+    processRawTouches(false /*timeout*/);
+&#125;
+</code></pre>
+<h4 id="TouchInputMapper-processRawTouches"><a href="#TouchInputMapper-processRawTouches" class="headerlink" title="TouchInputMapper::processRawTouches"></a>TouchInputMapper::processRawTouches</h4><p>frameworks&#x2F;native&#x2F;services&#x2F;inputflinger&#x2F;reader&#x2F;mapper&#x2F;TouchInputMapper.cpp</p>
+<pre><code>void TouchInputMapper::processRawTouches(bool timeout) &#123;
+    //如果当前事件的设备被禁用，则中断这个触摸事件集的传递
+    if (mDeviceMode == DeviceMode::DISABLED) &#123;
+        // Drop all input if the device is disabled.
+        cancelTouch(mCurrentRawState.when, mCurrentRawState.readTime);
+        mCurrentCookedState.clear();
+        updateTouchSpots();
+        return;
+    &#125;
+
+    // Drain any pending touch states. The invariant here is that the mCurrentRawState is always
+    // valid and must go through the full cook and dispatch cycle. This ensures that anything
+    // touching the current state will only observe the events that have been dispatched to the
+    // rest of the pipeline.
+    const size_t N = mRawStatesPending.size();
+    size_t count;
+    for (count = 0; count &lt; N; count++) &#123;
+        const RawState&amp; next = mRawStatesPending[count];
+
+        // A failure to assign the stylus id means that we&#39;re waiting on stylus data
+        // and so should defer the rest of the pipeline.
+        //检测手写笔id是否可以获取到，如果无法获取就中断本次触摸批事件处理
+        if (assignExternalStylusId(next, timeout)) &#123;
+            break;
+        &#125;
+
+        // All ready to go.
+        clearStylusDataPendingFlags();  //移除手写笔状态相关变量
+        mCurrentRawState.copyFrom(next);  //将next赋给mCurrentRawState
+        ...
+        cookAndDispatch(mCurrentRawState.when, mCurrentRawState.readTime);
+    &#125;
+    if (count != 0) &#123;
+        //从mRawStatesPending移除本次已处理的RawState，一个RawState对应一次SYNC包含的触摸事件集
+        mRawStatesPending.erase(mRawStatesPending.begin(), mRawStatesPending.begin() + count);
+    &#125;
+    ...
+&#125;
+</code></pre>
+<h4 id="TouchInputMapper-cookAndDispatch"><a href="#TouchInputMapper-cookAndDispatch" class="headerlink" title="TouchInputMapper::cookAndDispatch"></a>TouchInputMapper::cookAndDispatch</h4><pre><code>void TouchInputMapper::cookAndDispatch(nsecs_t when, nsecs_t readTime) &#123;
+    // Always start with a clean state.
+    mCurrentCookedState.clear();
+
+    // Apply stylus buttons to current raw state.
+    applyExternalStylusButtonState(when);  //处理手写笔按键状态
+
+    // Handle policy on initial down or hover events.
+    bool initialDown = mLastRawState.rawPointerData.pointerCount == 0 &amp;&amp;
+            mCurrentRawState.rawPointerData.pointerCount != 0;
+
+    uint32_t policyFlags = 0;
+    bool buttonsPressed = mCurrentRawState.buttonState &amp; ~mLastRawState.buttonState;
+    if (initialDown || buttonsPressed) &#123;
+        // If this is a touch screen, hide the pointer on an initial down.
+        if (mDeviceMode == DeviceMode::DIRECT) &#123;
+            getContext()-&gt;fadePointer();
+        &#125;
+
+        if (mParameters.wake) &#123;
+            policyFlags |= POLICY_FLAG_WAKE;
+        &#125;
+    &#125;
+
+    // Consume raw off-screen touches before cooking pointer data.
+    // If touches are consumed, subsequent code will not receive any pointer data.
+    //处理一些非屏幕区域的触摸行为，比如屏幕外的虚拟按键等，
+    //如果本次触摸是虚拟按键，那么本次触摸事件将会被虚拟按键逻辑消费，不在往下处理
+    if (consumeRawTouches(when, readTime, policyFlags)) &#123;
+        mCurrentRawState.rawPointerData.clear();
+    &#125;
+
+    // Cook pointer data.  This call populates the mCurrentCookedState.cookedPointerData structure
+    // with cooked pointer data that has the same ids and indices as the raw data.
+    // The following code can use either the raw or cooked data, as needed.
+    //这里就是将触摸设备(TP)的坐标范围映射到实际屏幕的坐标范围等（常识：TP的坐标不一定和屏幕的坐标对应，所以需要转化）
+    cookPointerData();
+    
+    // Apply stylus pressure to current cooked state.
+    applyExternalStylusTouchState(when);  处理手写笔触摸状态
+
+    // Synthesize key down from raw buttons if needed.
+    // 如果上面有处理触摸按键相关的事件，在这里会进行按键事件的分发，走按键分发逻辑（notifyKey）
+    synthesizeButtonKeys(getContext(), AKEY_EVENT_ACTION_DOWN, when, readTime, getDeviceId(),
+                         mSource, mViewport.displayId, policyFlags, mLastCookedState.buttonState,
+                         mCurrentCookedState.buttonState);
+
+    // Dispatch the touches either directly or by translation through a pointer on screen.
+    if (mDeviceMode == DeviceMode::POINTER) &#123;  //pointer光标
+        ...
+    &#125; else &#123;  //触摸 DeviceMode::DIRECT touchscreen
+        if (!mCurrentMotionAborted) &#123;
+            updateTouchSpots();  //更新触摸点相关
+            dispatchButtonRelease(when, readTime, policyFlags);  //一般触摸不涉及，不进行任何处理
+            dispatchHoverExit(when, readTime, policyFlags);  //一般触摸不涉及，不进行任何处理
+            dispatchTouches(when, readTime, policyFlags);  // 分发触摸事件，主要是这里
+            dispatchHoverEnterAndMove(when, readTime, policyFlags);  //一般触摸不涉及，不进行任何处理
+            dispatchButtonPress(when, readTime, policyFlags);  //一般触摸不涉及，不进行任何处理
+        &#125;
+
+        if (mCurrentCookedState.cookedPointerData.pointerCount == 0) &#123;
+            mCurrentMotionAborted = false;
+        &#125;
+    &#125;
+
+    // Synthesize key up from raw buttons if needed.
+    synthesizeButtonKeys(getContext(), AKEY_EVENT_ACTION_UP, when, readTime, getDeviceId(), mSource,
+                         mViewport.displayId, policyFlags, mLastCookedState.buttonState,
+                         mCurrentCookedState.buttonState);
+        
+    // Clear some transient state.
+    mCurrentRawState.rawVScroll = 0;
+    mCurrentRawState.rawHScroll = 0;
+
+    // Copy current touch to last touch in preparation for the next cycle.
+    mLastRawState.copyFrom(mCurrentRawState);
+    mLastCookedState.copyFrom(mCurrentCookedState);
+&#125;
+</code></pre>
+<h4 id="TouchInputMapper-cookPointerData"><a href="#TouchInputMapper-cookPointerData" class="headerlink" title="TouchInputMapper::cookPointerData"></a>TouchInputMapper::cookPointerData</h4><pre><code>void TouchInputMapper::cookPointerData() &#123;
+    uint32_t currentPointerCount = mCurrentRawState.rawPointerData.pointerCount;
+    
+    mCurrentCookedState.cookedPointerData.clear();
+    mCurrentCookedState.cookedPointerData.pointerCount = currentPointerCount;
+    mCurrentCookedState.cookedPointerData.hoveringIdBits =
+            mCurrentRawState.rawPointerData.hoveringIdBits;
+    mCurrentCookedState.cookedPointerData.touchingIdBits =
+            mCurrentRawState.rawPointerData.touchingIdBits;
+    mCurrentCookedState.cookedPointerData.canceledIdBits =
+            mCurrentRawState.rawPointerData.canceledIdBits;
+
+    if (mCurrentCookedState.cookedPointerData.pointerCount == 0) &#123;
+        mCurrentCookedState.buttonState = 0;
+    &#125; else &#123;
+        mCurrentCookedState.buttonState = mCurrentRawState.buttonState;
+    &#125;
+
+
+    // Walk through the the active pointers and map device coordinates onto
+    // display coordinates and adjust for display orientation.
+    // 遍历活动指针并将设备坐标映射到显示坐标并调整显示方向。
+    // 并将相关的转化值写入mCurrentCookedState.cookedPointerData
+    for (uint32_t i = 0; i &lt; currentPointerCount; i++) &#123;
+        const RawPointerData::Pointer&amp; in = mCurrentRawState.rawPointerData.pointers[i];
+
+        // Size
+        // 长短轴大小校准
+        float touchMajor, touchMinor, toolMajor, toolMinor, size;
+        switch (mCalibration.sizeCalibration) &#123;
+            case Calibration::SizeCalibration::GEOMETRIC:  //几何类型
+            case Calibration::SizeCalibration::DIAMETER:  //直径类型
+            case Calibration::SizeCalibration::BOX:  // 方型？
+            case Calibration::SizeCalibration::AREA:  //面积类型？
+                if (mRawPointerAxes.touchMajor.valid &amp;&amp; mRawPointerAxes.toolMajor.valid) &#123;
+                    touchMajor = in.touchMajor;
+                    touchMinor = mRawPointerAxes.touchMinor.valid ? in.touchMinor : in.touchMajor;
+                    toolMajor = in.toolMajor;
+                    toolMinor = mRawPointerAxes.toolMinor.valid ? in.toolMinor : in.toolMajor;
+                    size = mRawPointerAxes.touchMinor.valid ? avg(in.touchMajor, in.touchMinor)
+                                                            : in.touchMajor;
+                &#125; else if (mRawPointerAxes.touchMajor.valid) &#123;
+                    toolMajor = touchMajor = in.touchMajor;
+                    toolMinor = touchMinor =
+                            mRawPointerAxes.touchMinor.valid ? in.touchMinor : in.touchMajor;
+                    size = mRawPointerAxes.touchMinor.valid ? avg(in.touchMajor, in.touchMinor)
+                                                            : in.touchMajor;
+                &#125; else if (mRawPointerAxes.toolMajor.valid) &#123;
+                    touchMajor = toolMajor = in.toolMajor;
+                    touchMinor = toolMinor =
+                            mRawPointerAxes.toolMinor.valid ? in.toolMinor : in.toolMajor;
+                    size = mRawPointerAxes.toolMinor.valid ? avg(in.toolMajor, in.toolMinor)
+                                                           : in.toolMajor;
+                &#125; else &#123;
+                    ...
+                &#125;
+
+                if (mCalibration.haveSizeIsSummed &amp;&amp; mCalibration.sizeIsSummed) &#123;
+                    uint32_t touchingCount = mCurrentRawState.rawPointerData.touchingIdBits.count();
+                    if (touchingCount &gt; 1) &#123;
+                        touchMajor /= touchingCount;
+                        touchMinor /= touchingCount;
+                        toolMajor /= touchingCount;
+                        toolMinor /= touchingCount;
+                        size /= touchingCount;
+                    &#125;
+                &#125;
+
+                if (mCalibration.sizeCalibration == Calibration::SizeCalibration::GEOMETRIC) &#123;
+                    touchMajor *= mGeometricScale;
+                    touchMinor *= mGeometricScale;
+                    toolMajor *= mGeometricScale;
+                    toolMinor *= mGeometricScale;
+                &#125; else if (mCalibration.sizeCalibration == Calibration::SizeCalibration::AREA) &#123;
+                    touchMajor = touchMajor &gt; 0 ? sqrtf(touchMajor) : 0;
+                    touchMinor = touchMajor;
+                    toolMajor = toolMajor &gt; 0 ? sqrtf(toolMajor) : 0;
+                    toolMinor = toolMajor;
+                &#125; else if (mCalibration.sizeCalibration == Calibration::SizeCalibration::DIAMETER) &#123;
+                    touchMinor = touchMajor;
+                    toolMinor = toolMajor;
+                &#125;
+
+                mCalibration.applySizeScaleAndBias(&amp;touchMajor);
+                mCalibration.applySizeScaleAndBias(&amp;touchMinor);
+                mCalibration.applySizeScaleAndBias(&amp;toolMajor);
+                mCalibration.applySizeScaleAndBias(&amp;toolMinor);
+                size *= mSizeScale;
+                break;
+            default:
+                touchMajor = 0;
+                touchMinor = 0;
+                toolMajor = 0;
+                toolMinor = 0;
+                size = 0;
+                break;
+        &#125;
+
+        // Pressure
+        //压感校准
+        float pressure;
+        switch (mCalibration.pressureCalibration) &#123;
+            case Calibration::PressureCalibration::PHYSICAL:
+            case Calibration::PressureCalibration::AMPLITUDE:
+                pressure = in.pressure * mPressureScale;
+                break;
+            default:
+                pressure = in.isHovering ? 0 : 1;
+                break;
+        &#125;
+
+        // Tilt and Orientation
+        //倾斜角度和方向
+        float tilt;
+        float orientation;
+        if (mHaveTilt) &#123;
+            float tiltXAngle = (in.tiltX - mTiltXCenter) * mTiltXScale;
+            float tiltYAngle = (in.tiltY - mTiltYCenter) * mTiltYScale;
+            orientation = atan2f(-sinf(tiltXAngle), sinf(tiltYAngle));
+            tilt = acosf(cosf(tiltXAngle) * cosf(tiltYAngle));
+        &#125; else &#123;
+            tilt = 0;
+
+            switch (mCalibration.orientationCalibration) &#123;
+                case Calibration::OrientationCalibration::INTERPOLATED:
+                    orientation = in.orientation * mOrientationScale;
+                    break;
+                case Calibration::OrientationCalibration::VECTOR: &#123;
+                    int32_t c1 = signExtendNybble((in.orientation &amp; 0xf0) &gt;&gt; 4);
+                    int32_t c2 = signExtendNybble(in.orientation &amp; 0x0f);
+                    if (c1 != 0 || c2 != 0) &#123;
+                        orientation = atan2f(c1, c2) * 0.5f;
+                        float confidence = hypotf(c1, c2);
+                        float scale = 1.0f + confidence / 16.0f;
+                        touchMajor *= scale;
+                        touchMinor /= scale;
+                        toolMajor *= scale;
+                        toolMinor /= scale;
+                    &#125; else &#123;
+                        orientation = 0;
+                    &#125;
+                    break;
+                &#125;
+                default:
+                    orientation = 0;
+            &#125;
+        &#125;
+
+        // Distance
+        //距离校准
+        float distance;
+        switch (mCalibration.distanceCalibration) &#123;
+            case Calibration::DistanceCalibration::SCALED:
+                distance = in.distance * mDistanceScale;
+                break;
+            default:
+                distance = 0;
+        &#125;
+
+        // Coverage
+        // 覆盖校准？
+        int32_t rawLeft, rawTop, rawRight, rawBottom;
+        switch (mCalibration.coverageCalibration) &#123;
+            case Calibration::CoverageCalibration::BOX:
+                rawLeft = (in.toolMinor &amp; 0xffff0000) &gt;&gt; 16;
+                rawRight = in.toolMinor &amp; 0x0000ffff;
+                rawBottom = in.toolMajor &amp; 0x0000ffff;
+                rawTop = (in.toolMajor &amp; 0xffff0000) &gt;&gt; 16;
+                break;
+            default:
+                rawLeft = rawTop = rawRight = rawBottom = 0;
+                break;
+        &#125;
+
+        // Adjust X,Y coords for device calibration
+        // TODO: Adjust coverage coords?
+        float xTransformed = in.x, yTransformed = in.y;
+        mAffineTransform.applyTo(xTransformed, yTransformed);
+        rotateAndScale(xTransformed, yTransformed);
+
+        // Adjust X, Y, and coverage coords for input device orientation.
+        float left, top, right, bottom;
+        // 转换触摸设备坐标到实际的屏幕方向上的坐标
+        switch (mInputDeviceOrientation) &#123;
+            case DISPLAY_ORIENTATION_90:
+                left = float(rawTop - mRawPointerAxes.y.minValue) * mYScale;
+                right = float(rawBottom - mRawPointerAxes.y.minValue) * mYScale;
+                bottom = float(mRawPointerAxes.x.maxValue - rawLeft) * mXScale;
+                top = float(mRawPointerAxes.x.maxValue - rawRight) * mXScale;
+                orientation -= M_PI_2;
+                if (mOrientedRanges.haveOrientation &amp;&amp;
+                    orientation &lt; mOrientedRanges.orientation.min) &#123;
+                    orientation +=
+                            (mOrientedRanges.orientation.max - mOrientedRanges.orientation.min);
+                &#125;
+                break;
+            case DISPLAY_ORIENTATION_180:
+                left = float(mRawPointerAxes.x.maxValue - rawRight) * mXScale;
+                right = float(mRawPointerAxes.x.maxValue - rawLeft) * mXScale;
+                bottom = float(mRawPointerAxes.y.maxValue - rawTop) * mYScale;
+                top = float(mRawPointerAxes.y.maxValue - rawBottom) * mYScale;
+                orientation -= M_PI;
+                if (mOrientedRanges.haveOrientation &amp;&amp;
+                    orientation &lt; mOrientedRanges.orientation.min) &#123;
+                    orientation +=
+                            (mOrientedRanges.orientation.max - mOrientedRanges.orientation.min);
+                &#125;
+                break;
+            case DISPLAY_ORIENTATION_270:
+                left = float(mRawPointerAxes.y.maxValue - rawBottom) * mYScale;
+                right = float(mRawPointerAxes.y.maxValue - rawTop) * mYScale;
+                bottom = float(rawRight - mRawPointerAxes.x.minValue) * mXScale;
+                top = float(rawLeft - mRawPointerAxes.x.minValue) * mXScale;
+                orientation += M_PI_2;
+                if (mOrientedRanges.haveOrientation &amp;&amp;
+                    orientation &gt; mOrientedRanges.orientation.max) &#123;
+                    orientation -=
+                            (mOrientedRanges.orientation.max - mOrientedRanges.orientation.min);
+                &#125;
+                break;
+            default:
+                left = float(rawLeft - mRawPointerAxes.x.minValue) * mXScale;
+                right = float(rawRight - mRawPointerAxes.x.minValue) * mXScale;
+                bottom = float(rawBottom - mRawPointerAxes.y.minValue) * mYScale;
+                top = float(rawTop - mRawPointerAxes.y.minValue) * mYScale;
+                break;
+        &#125;
+
+        // Write output coords.
+        PointerCoords&amp; out = mCurrentCookedState.cookedPointerData.pointerCoords[i];
+        out.clear();
+        out.setAxisValue(AMOTION_EVENT_AXIS_X, xTransformed);
+        out.setAxisValue(AMOTION_EVENT_AXIS_Y, yTransformed);
+        out.setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, pressure);
+        out.setAxisValue(AMOTION_EVENT_AXIS_SIZE, size);
+        out.setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR, touchMajor);
+        out.setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR, touchMinor);
+        out.setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION, orientation);
+        out.setAxisValue(AMOTION_EVENT_AXIS_TILT, tilt);
+        out.setAxisValue(AMOTION_EVENT_AXIS_DISTANCE, distance);
+        if (mCalibration.coverageCalibration == Calibration::CoverageCalibration::BOX) &#123;
+            out.setAxisValue(AMOTION_EVENT_AXIS_GENERIC_1, left);
+            out.setAxisValue(AMOTION_EVENT_AXIS_GENERIC_2, top);
+            out.setAxisValue(AMOTION_EVENT_AXIS_GENERIC_3, right);
+            out.setAxisValue(AMOTION_EVENT_AXIS_GENERIC_4, bottom);
+        &#125; else &#123;
+            out.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR, toolMajor);
+            out.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR, toolMinor);
+        &#125;
+
+        // Write output relative fields if applicable.
+        uint32_t id = in.id;
+        if (mSource == AINPUT_SOURCE_TOUCHPAD &amp;&amp;
+            mLastCookedState.cookedPointerData.hasPointerCoordsForId(id)) &#123;
+            const PointerCoords&amp; p = mLastCookedState.cookedPointerData.pointerCoordsForId(id);
+            float dx = xTransformed - p.getAxisValue(AMOTION_EVENT_AXIS_X);
+            float dy = yTransformed - p.getAxisValue(AMOTION_EVENT_AXIS_Y);
+            out.setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_X, dx);
+            out.setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_Y, dy);
+        &#125;
+
+        // Write output properties.
+        PointerProperties&amp; properties = mCurrentCookedState.cookedPointerData.pointerProperties[i];
+        properties.clear();
+        properties.id = id;
+        properties.toolType = in.toolType;
+
+        // Write id index and mark id as valid.
+        mCurrentCookedState.cookedPointerData.idToIndex[id] = i;
+        mCurrentCookedState.cookedPointerData.validIdBits.markBit(id);
+    &#125;
+&#125;
+</code></pre>
+<h4 id="TouchInputMapper-dispatchTouches"><a href="#TouchInputMapper-dispatchTouches" class="headerlink" title="TouchInputMapper::dispatchTouches"></a>TouchInputMapper::dispatchTouches</h4><pre><code>void TouchInputMapper::dispatchTouches(nsecs_t when, nsecs_t readTime, uint32_t policyFlags) &#123;
+    BitSet32 currentIdBits = mCurrentCookedState.cookedPointerData.touchingIdBits;
+    BitSet32 lastIdBits = mLastCookedState.cookedPointerData.touchingIdBits;
+    int32_t metaState = getContext()-&gt;getGlobalMetaState();
+    int32_t buttonState = mCurrentCookedState.buttonState;
+        
+    if (currentIdBits == lastIdBits) &#123;  //pointer id 没有改变
+        if (!currentIdBits.isEmpty()) &#123;
+            // No pointer id changes so this is a move event.
+            // The listener takes care of batching moves so we don&#39;t have to deal with that here.
+            // 如果pointer id 没有改变，说明是个move事件，这里不进行处理，直接分发到listener
+            dispatchMotion(when, readTime, policyFlags, mSource, AMOTION_EVENT_ACTION_MOVE, 0, 0,
+                           metaState, buttonState, AMOTION_EVENT_EDGE_FLAG_NONE,
+                           mCurrentCookedState.cookedPointerData.pointerProperties,
+                           mCurrentCookedState.cookedPointerData.pointerCoords,
+                           mCurrentCookedState.cookedPointerData.idToIndex, currentIdBits, -1,
+                           mOrientedXPrecision, mOrientedYPrecision, mDownTime);
+        &#125;
+    &#125; else &#123;
+        // There may be pointers going up and pointers going down and pointers moving
+        // all at the same time.
+        // 获取并更新四个方向pointers的值，判断本次是down、up、move的哪一种
+        BitSet32 upIdBits(lastIdBits.value &amp; ~currentIdBits.value);
+        BitSet32 downIdBits(currentIdBits.value &amp; ~lastIdBits.value);
+        BitSet32 moveIdBits(lastIdBits.value &amp; currentIdBits.value);
+        BitSet32 dispatchedIdBits(lastIdBits.value);  //用于记录上一次分发的事件
+
+        // Update last coordinates of pointers that have moved so that we observe the new
+        // pointer positions at the same time as other pointers that have just gone up.
+        //更新最后一个pointers的坐标
+        bool moveNeeded =
+                updateMovedPointers(mCurrentCookedState.cookedPointerData.pointerProperties,
+                                    mCurrentCookedState.cookedPointerData.pointerCoords,
+                                    mCurrentCookedState.cookedPointerData.idToIndex,
+                                    mLastCookedState.cookedPointerData.pointerProperties,
+                                    mLastCookedState.cookedPointerData.pointerCoords,
+                                    mLastCookedState.cookedPointerData.idToIndex, moveIdBits);
+        if (buttonState != mLastCookedState.buttonState) &#123;
+            moveNeeded = true;
+        &#125;
+
+        // Dispatch pointer up events.
+        //分发up事件
+        while (!upIdBits.isEmpty()) &#123;
+            uint32_t upId = upIdBits.clearFirstMarkedBit();  //这个id应该和downId相同（看上面的更新四个方向BitSet32可知）
+            bool isCanceled = mCurrentCookedState.cookedPointerData.canceledIdBits.hasBit(uplastIdBitsId);
+            if (isCanceled) &#123;
+                ALOGI(&quot;Canceling pointer %d for the palm event was detected.&quot;, upId);
+            &#125;
+            dispatchMotion(when, readTime, policyFlags, mSource, AMOTION_EVENT_ACTION_POINTER_UP, 0,
+                           isCanceled ? AMOTION_EVENT_FLAG_CANCELED : 0, metaState, buttonState, 0,
+                           mLastCookedState.cookedPointerData.pointerProperties,
+                           mLastCookedState.cookedPointerData.pointerCoords,
+                           mLastCookedState.cookedPointerData.idToIndex, dispatchedIdBits, upId,
+                           mOrientedXPrecision, mOrientedYPrecision, mDownTime);
+            dispatchedIdBits.clearBit(upId);  //up事件分发后，重置dispatchedIdBits
+            mCurrentCookedState.cookedPointerData.canceledIdBits.clearBit(upId);
+        &#125;
+
+        // Dispatch move events if any of the remaining pointers moved from their old locations.
+        // Although applications receive new locations as part of individual pointer up
+        // events, they do not generally handle them except when presented in a move event.
+        //分发move事件
+        if (moveNeeded &amp;&amp; !moveIdBits.isEmpty()) &#123;
+            ALOG_ASSERT(moveIdBits.value == dispatchedIdBits.value);
+            dispatchMotion(when, readTime, policyFlags, mSource, AMOTION_EVENT_ACTION_MOVE, 0, 0,
+                           metaState, buttonState, 0,
+                           mCurrentCookedState.cookedPointerData.pointerProperties,
+                           mCurrentCookedState.cookedPointerData.pointerCoords,
+                           mCurrentCookedState.cookedPointerData.idToIndex, dispatchedIdBits, -1,
+                           mOrientedXPrecision, mOrientedYPrecision, mDownTime);
+        &#125;
+
+        // Dispatch pointer down events using the new pointer locations.
+        //分发down事件
+        while (!downIdBits.isEmpty()) &#123;
+            uint32_t downId = downIdBits.clearFirstMarkedBit();
+            dispatchedIdBits.markBit(downId); //记录分发的down事件
+
+            if (dispatchedIdBits.count() == 1) &#123;
+                // First pointer is going down.  Set down time.
+                mDownTime = when;
+            &#125;
+
+            dispatchMotion(when, readTime, policyFlags, mSource, AMOTION_EVENT_ACTION_POINTER_DOWN,
+                           0, 0, metaState, buttonState, 0,
+                           mCurrentCookedState.cookedPointerData.pointerProperties,
+                           mCurrentCookedState.cookedPointerData.pointerCoords,
+                           mCurrentCookedState.cookedPointerData.idToIndex, dispatchedIdBits,
+                           downId, mOrientedXPrecision, mOrientedYPrecision, mDownTime);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<h4 id="TouchInputMapper-dispatchMotion"><a href="#TouchInputMapper-dispatchMotion" class="headerlink" title="TouchInputMapper::dispatchMotion"></a>TouchInputMapper::dispatchMotion</h4><pre><code>void TouchInputMapper::dispatchMotion(nsecs_t when, nsecs_t readTime, uint32_t policyFlags,
+                                      uint32_t source, int32_t action, int32_t actionButton,
+                                      int32_t flags, int32_t metaState, int32_t buttonState,
+                                      int32_t edgeFlags, const PointerProperties* properties,
+                                      const PointerCoords* coords, const uint32_t* idToIndex,
+                                      BitSet32 idBits, int32_t changedId, float xPrecision,
+                                      float yPrecision, nsecs_t downTime) &#123;
+    PointerCoords pointerCoords[MAX_POINTERS];
+    PointerProperties pointerProperties[MAX_POINTERS];
+    uint32_t pointerCount = 0;
+    while (!idBits.isEmpty()) &#123;
+        uint32_t id = idBits.clearFirstMarkedBit();
+        uint32_t index = idToIndex[id];
+        pointerProperties[pointerCount].copyFrom(properties[index]);
+        pointerCoords[pointerCount].copyFrom(coords[index]);
+
+        if (changedId &gt;= 0 &amp;&amp; id == uint32_t(changedId)) &#123;
+            action |= pointerCount &lt;&lt; AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+        &#125;
+
+        pointerCount += 1;
+    &#125;
+
+    ALOG_ASSERT(pointerCount != 0);
+
+    if (changedId &gt;= 0 &amp;&amp; pointerCount == 1) &#123;
+        // Replace initial down and final up action.
+        // We can compare the action without masking off the changed pointer index
+        // because we know the index is 0.
+        if (action == AMOTION_EVENT_ACTION_POINTER_DOWN) &#123;
+            action = AMOTION_EVENT_ACTION_DOWN;
+        &#125; else if (action == AMOTION_EVENT_ACTION_POINTER_UP) &#123;
+            if ((flags &amp; AMOTION_EVENT_FLAG_CANCELED) != 0) &#123;
+                action = AMOTION_EVENT_ACTION_CANCEL;
+            &#125; else &#123;
+                action = AMOTION_EVENT_ACTION_UP;
+            &#125;
+        &#125; else &#123;
+            // Can&#39;t happen.
+            ALOG_ASSERT(false);
+        &#125;
+    &#125;
+    float xCursorPosition = AMOTION_EVENT_INVALID_CURSOR_POSITION;
+    float yCursorPosition = AMOTION_EVENT_INVALID_CURSOR_POSITION;
+    if (mDeviceMode == DeviceMode::POINTER) &#123;  //是否是pointer模式，触摸是DIRECT模式，所以一般不设置这个
+        mPointerController-&gt;getPosition(&amp;xCursorPosition, &amp;yCursorPosition);
+    &#125;
+    //获取当前物理屏幕的id（有些设备有多个屏幕）
+    //获取displayId主要从DisplayViewport中，而DisplayViewport主要来自：
+    // 1. inputDevice中通过configure中指定。
+      // 2. WindowManagerService指定。
+      // 3.通过idc文件中的唯一id或显示类型获取匹配的Viewport
+    const int32_t displayId = getAssociatedDisplayId().value_or(ADISPLAY_ID_NONE);
+    const int32_t deviceId = getDeviceId();
+    std::vector&lt;TouchVideoFrame&gt; frames = getDeviceContext().getVideoFrames();  //有关视频触摸事件的，一般不是
+    std::for_each(frames.begin(), frames.end(),
+                  [this](TouchVideoFrame&amp; frame) &#123; frame.rotate(this-&gt;mInputDeviceOrientation); &#125;);
+    //创建NotifyMotionArgs对象
+    NotifyMotionArgs args(getContext()-&gt;getNextId(), when, readTime, deviceId, source, displayId,
+                          policyFlags, action, actionButton, flags, metaState, buttonState,
+                          MotionClassification::NONE, edgeFlags, pointerCount, pointerProperties,
+                          pointerCoords, xPrecision, yPrecision, xCursorPosition, yCursorPosition,
+                          downTime, std::move(frames));
+     // 调用mapper创建时关联的context持有的QueuedInputListener对象的notifyMotion
+     // 这里是getListener是UnwantedInteractionBlocker
+    getListener().notifyMotion(&amp;args);
+&#125;
+</code></pre>
+<h4 id="QueuedInputListener-notifyMotion"><a href="#QueuedInputListener-notifyMotion" class="headerlink" title="QueuedInputListener::notifyMotion"></a>QueuedInputListener::notifyMotion</h4><pre><code>void QueuedInputListener::notifyMotion(const NotifyMotionArgs* args) &#123;
+    ALOGD(&quot;hongxi.zhu: QueuedInputListener::notifyMotion() -&gt; mArgsQueue.emplace_back(NotifyMotionArgs)&quot;);
+    traceEvent(__func__, args-&gt;id);
+    mArgsQueue.emplace_back(std::make_unique&lt;NotifyMotionArgs&gt;(*args));
+&#125;
+</code></pre>
+<p><code>QueuedInputListener::notifyMotion</code>只是将<code>NotifyMotionArgs</code>加入当前<code>listener</code>对象的<code>mArgsQueue</code>列表, 到这里我们<code>InputReader::processEventsLocked</code>方法就执行结束，回到<code>loopOnce()</code>中继续往下执行到<code>mQueuedListener.flush()</code>，开始事件的传递。</p>
+<h3 id="二、mQueuedListener-flush-事件传递"><a href="#二、mQueuedListener-flush-事件传递" class="headerlink" title="二、mQueuedListener.flush()事件传递"></a>二、mQueuedListener.flush()事件传递</h3><p>接着上面，在<code>InputReader::loopOnce()</code>中往下执行到<code>mQueuedListener.flush()</code></p>
+<h4 id="QueuedInputListener-flush"><a href="#QueuedInputListener-flush" class="headerlink" title="QueuedInputListener::flush()"></a>QueuedInputListener::flush()</h4><p>frameworks&#x2F;native&#x2F;services&#x2F;inputflinger&#x2F;InputListener.cpp</p>
+<pre><code>void QueuedInputListener::flush() &#123;
+    for (const std::unique_ptr&lt;NotifyArgs&gt;&amp; args : mArgsQueue) &#123;
+        args-&gt;notify(mInnerListener);  //args这里是前面传进来的NotifyMotionArgs
+    &#125;
+    mArgsQueue.clear();
+&#125;
+</code></pre>
+<h4 id="NotifyMotionArgs-notify"><a href="#NotifyMotionArgs-notify" class="headerlink" title="NotifyMotionArgs::notify"></a>NotifyMotionArgs::notify</h4><p>frameworks&#x2F;native&#x2F;services&#x2F;inputflinger&#x2F;InputListener.cpp</p>
+<pre><code>void NotifyMotionArgs::notify(InputListenerInterface&amp; listener) const &#123;
+    listener.notifyMotion(this);
+&#125;
+</code></pre>
+<p>这个<code>listener</code>是一个<code>InputListenerInterface</code>子类对象，到底是哪个呢？回顾下<code>InputManager</code>的构造方法，<br>frameworks&#x2F;native&#x2F;services&#x2F;inputflinger&#x2F;InputManager.cpp</p>
+<pre><code>InputManager::InputManager(
+        const sp&lt;InputReaderPolicyInterface&gt;&amp; readerPolicy,
+        const sp&lt;InputDispatcherPolicyInterface&gt;&amp; dispatcherPolicy) &#123;
+    mDispatcher = createInputDispatcher(dispatcherPolicy);
+    mClassifier = std::make_unique&lt;InputClassifier&gt;(*mDispatcher);
+    mBlocker = std::make_unique&lt;UnwantedInteractionBlocker&gt;(*mClassifier);
+    mReader = createInputReader(readerPolicy, *mBlocker);
+&#125;
+</code></pre>
+<p><code>mDispatcher</code>、<code>mClassifier</code>、<code>mBlocker</code>都是<code>InputListenerInterface</code>的子类，从构造方法的传参得出事件传递的过程：<br><code>InputReader-&gt;UnwantedInteractionBlocker-&gt;InputClassifier-&gt;InputDispatcher</code><br>结合类继承关系，可知上面<code>InputReader::loopOnce()</code>中的<code>mQueuedListener</code>是<code>UnwantedInteractionBlocker</code>，调用它的<code>flush</code>方法(这几个子类都没有实现<code>flush</code>方法，所以执行的是<code>QueuedInputListener</code>的<code>flush</code>方法)，<code>QueuedInputListener</code>中的<code>mInnerListener</code>是<code>UnwantedInteractionBlocker</code>，那么<code>listener.notifyMotion(this)</code>实际就是：<code>UnwantedInteractionBlocker::notifyMotion(NotifyMotionArgs)</code></p>
+<h4 id="UnwantedInteractionBlocker-notifyMotion"><a href="#UnwantedInteractionBlocker-notifyMotion" class="headerlink" title="UnwantedInteractionBlocker::notifyMotion"></a>UnwantedInteractionBlocker::notifyMotion</h4><p>frameworks&#x2F;native&#x2F;services&#x2F;inputflinger&#x2F;UnwantedInteractionBlocker.cpp</p>
+<pre><code>void UnwantedInteractionBlocker::notifyMotion(const NotifyMotionArgs* args) &#123;
+    &#123; // acquire lock
+        std::scoped_lock lock(mLock);
+        const std::vector&lt;NotifyMotionArgs&gt; processedArgs =
+                mPreferStylusOverTouchBlocker.processMotion(*args);
+        for (const NotifyMotionArgs&amp; loopArgs : processedArgs) &#123;
+            notifyMotionLocked(&amp;loopArgs);
+        &#125;
+    &#125; // release lock
+
+    // Call out to the next stage without holding the lock
+    mQueuedListener.flush();
+&#125;
+</code></pre>
+<h4 id="UnwantedInteractionBlocker-notifyMotionLocked"><a href="#UnwantedInteractionBlocker-notifyMotionLocked" class="headerlink" title="UnwantedInteractionBlocker::notifyMotionLocked"></a>UnwantedInteractionBlocker::notifyMotionLocked</h4><pre><code>void UnwantedInteractionBlocker::notifyMotionLocked(const NotifyMotionArgs* args) &#123;
+    auto it = mPalmRejectors.find(args-&gt;deviceId);
+    const bool sendToPalmRejector = it != mPalmRejectors.end() &amp;&amp; isFromTouchscreen(args-&gt;source);
+    if (!sendToPalmRejector) &#123;  //如果不支持手掌误触处理，走这里，一般走这里
+        //调用UnwantedInteractionBlocker中持有的QueuedListener对象的notifyMotion
+        //mQueuedListener这里是
+        mQueuedListener.notifyMotion(args);  //一般走这里, 按照前面
+        return;
+    &#125;
+    //如果支持手掌误触
+    std::vector&lt;NotifyMotionArgs&gt; processedArgs = it-&gt;second.processMotion(*args);
+processedArgs.size());
+    for (const NotifyMotionArgs&amp; loopArgs : processedArgs) &#123;
+        mQueuedListener.notifyMotion(&amp;loopArgs);  //同理这里的mQueuedListener是InputClassifier
+    &#125;
+&#125;
+</code></pre>
+<p>然后又是同样的走法<code>notifyMotion</code>-&gt;<code>flush</code>-&gt;<code>notifyMotion</code>, <code>mInnerListener</code>是<code>InputClassifier</code></p>
+<h4 id="QueuedInputListener-notifyMotion-1"><a href="#QueuedInputListener-notifyMotion-1" class="headerlink" title="QueuedInputListener::notifyMotion"></a>QueuedInputListener::notifyMotion</h4><pre><code>void QueuedInputListener::notifyMotion(const NotifyMotionArgs* args) &#123;
+    traceEvent(__func__, args-&gt;id);
+    mArgsQueue.emplace_back(std::make_unique&lt;NotifyMotionArgs&gt;(*args));
+&#125;
+
+void QueuedInputListener::flush() &#123;
+    for (const std::unique_ptr&lt;NotifyArgs&gt;&amp; args : mArgsQueue) &#123;
+           //args这里是前面传进来的NotifyMotionArgs，mInnerListener是InputClassifier
+        args-&gt;notify(mInnerListener);
+    &#125;
+    mArgsQueue.clear();
+&#125;
+
+void NotifyMotionArgs::notify(InputListenerInterface&amp; listener) const &#123;
+    listener.notifyMotion(this);
+&#125;
+</code></pre>
+<h4 id="InputClassifier-notifyMotion"><a href="#InputClassifier-notifyMotion" class="headerlink" title="InputClassifier::notifyMotion"></a>InputClassifier::notifyMotion</h4><pre><code>void InputClassifier::notifyMotion(const NotifyMotionArgs* args) &#123;
+    &#123; // acquire lock
+        std::scoped_lock lock(mLock);
+        // MotionClassifier is only used for touch events, for now
+        const bool sendToMotionClassifier = mMotionClassifier &amp;&amp; isTouchEvent(*args);
+        if (!sendToMotionClassifier) &#123;  //目前模拟器走这里，真机不清楚
+            mQueuedListener.notifyMotion(args);
+        &#125; else &#123;
+            NotifyMotionArgs newArgs(*args);
+            newArgs.classification = mMotionClassifier-&gt;classify(newArgs);
+            mQueuedListener.notifyMotion(&amp;newArgs);
+        &#125;
+    &#125; // release lock
+    mQueuedListener.flush();
+&#125;
+</code></pre>
+<p>然后又是同样的走法<code>notifyMotion</code>-&gt;<code>flush</code>-&gt;<code>notifyMotion</code>, <code>mInnerListener</code>是<code>InputDispatcher</code></p>
+<h4 id="QueuedInputListener-notifyMotion-2"><a href="#QueuedInputListener-notifyMotion-2" class="headerlink" title="QueuedInputListener::notifyMotion"></a>QueuedInputListener::notifyMotion</h4><pre><code>void QueuedInputListener::notifyMotion(const NotifyMotionArgs* args) &#123;
+    traceEvent(__func__, args-&gt;id);
+    mArgsQueue.emplace_back(std::make_unique&lt;NotifyMotionArgs&gt;(*args));
+&#125;
+
+void QueuedInputListener::flush() &#123;
+    for (const std::unique_ptr&lt;NotifyArgs&gt;&amp; args : mArgsQueue) &#123;
+           //args这里是前面传进来的NotifyMotionArgs，mInnerListener是InputClassifier
+        args-&gt;notify(mInnerListener);
+    &#125;
+    mArgsQueue.clear();
+&#125;
+</code></pre>
+<h4 id="InputDispatcher-notifyMotion"><a href="#InputDispatcher-notifyMotion" class="headerlink" title="InputDispatcher::notifyMotion"></a>InputDispatcher::notifyMotion</h4><pre><code>void InputDispatcher::notifyMotion(const NotifyMotionArgs* args) &#123;
+    ...
+    uint32_t policyFlags = args-&gt;policyFlags;
+    policyFlags |= POLICY_FLAG_TRUSTED;
+
+    android::base::Timer t;
+    //回调wms中的interceptMotionBeforeQueueingNonInteractive方法
+    mPolicy-&gt;interceptMotionBeforeQueueing(args-&gt;displayId, args-&gt;eventTime, /*byref*/ policyFlags);
+        
+    bool needWake = false;
+    &#123; // acquire lock
+        mLock.lock();
+        ...
+
+        // Just enqueue a new motion event.
+        //创建一个MotionEntry对象，将NotifyMotionArgs转化为MotionEntry
+        std::unique_ptr&lt;MotionEntry&gt; newEntry =
+                std::make_unique&lt;MotionEntry&gt;(args-&gt;id, args-&gt;eventTime, args-&gt;deviceId,
+                                              args-&gt;source, args-&gt;displayId, policyFlags,
+                                              args-&gt;action, args-&gt;actionButton, args-&gt;flags,
+                                              args-&gt;metaState, args-&gt;buttonState,
+                                              args-&gt;classification, args-&gt;edgeFlags,
+                                              args-&gt;xPrecision, args-&gt;yPrecision,
+                                              args-&gt;xCursorPosition, args-&gt;yCursorPosition,
+                                              args-&gt;downTime, args-&gt;pointerCount,
+                                              args-&gt;pointerProperties, args-&gt;pointerCoords);
+        ...
+        //将MotionEntry加入InboundQueue
+        needWake = enqueueInboundEventLocked(std::move(newEntry)); 
+        mLock.unlock();
+    &#125; // release lock
+
+    if (needWake) &#123;
+        mLooper-&gt;wake();  //唤醒InputDispatcher线程，处理InboundQueue中的MotionEntry
+    &#125;
+&#125;
+</code></pre>
+<h4 id="InputDispatcher-enqueueInboundEventLocked"><a href="#InputDispatcher-enqueueInboundEventLocked" class="headerlink" title="InputDispatcher::enqueueInboundEventLocked"></a>InputDispatcher::enqueueInboundEventLocked</h4><pre><code>bool InputDispatcher::enqueueInboundEventLocked(std::unique_ptr&lt;EventEntry&gt; newEntry) &#123;
+    bool needWake = mInboundQueue.empty();
+    mInboundQueue.push_back(std::move(newEntry));
+    EventEntry&amp; entry = *(mInboundQueue.back());
+    traceInboundQueueLengthLocked();
+
+    switch (entry.type) &#123;
+        case EventEntry::Type::KEY: &#123;
+              ...
+            break;
+        &#125;
+
+        case EventEntry::Type::MOTION: &#123;
+            LOG_ALWAYS_FATAL_IF((entry.policyFlags &amp; POLICY_FLAG_TRUSTED) == 0,
+                                &quot;Unexpected untrusted event.&quot;);
+            if (shouldPruneInboundQueueLocked(static_cast&lt;MotionEntry&amp;&gt;(entry))) &#123;
+                mNextUnblockedEvent = mInboundQueue.back();
+                needWake = true;
+            &#125;
+            break;
+            ...
+    &#125;
+
+    return needWake;
+&#125;
+</code></pre>
+<p>   到此，InputReader线程就将事件传递到InputDispatcher线程，InputDispatcher线程被唤醒开始处理触摸事件，而InputReader线程继续循环执行loopOnce()方法，再次阻塞在getEvents方法中等待事件的上报。</p>
+
+            </div>
+        
+        <footer class="article-footer">
+        </footer>
+    </div>
+</article>
+
+
+    
+<nav id="article-nav">
+   
+</nav>
+
+
+
+
+
+    
+    
+
+
+
+
+<!-- baidu url auto push script -->
+<script type="text/javascript">
+    !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=window.location.href,o=document.referrer;if(!e.test(r)){var n="//api.share.baidu.com/s.gif";o?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var t=new Image;t.src=n}}(window);
+</script>     
+</section>
+        </div>
+        <footer id="footer">
+    <div class="outer">
+       
+    </div>
+</footer>
+
+        
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>

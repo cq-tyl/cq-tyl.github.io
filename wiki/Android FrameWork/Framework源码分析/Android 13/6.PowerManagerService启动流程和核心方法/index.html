@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+ <meta name="referrer" content="no-referrer"/>
+    
+    <title>6.PowerManagerService启动流程和核心方法 | TYL</title>
+    
+    
+        <meta name="keywords" content="6.PowerManagerService启动流程和核心方法" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="PowerManagerService(简称PMS)主要是负责协调、管理设备CPU资源，并提供功能接口给应用框架层或应用层申请获取CPU资源的一个服务，例如：亮灭屏、关机、WakeLock管理、Dreamland(屏保模式)、休眠时间等行为。 1. PMS的启动流程PMS是在SystemServer的startBootstrapServices()中通过SystemServiceManager.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="6.PowerManagerService启动流程和核心方法">
+<meta property="og:url" content="https://cq_tyl.gitee.io/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/6.PowerManagerService%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%92%8C%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="TYL">
+<meta property="og:description" content="PowerManagerService(简称PMS)主要是负责协调、管理设备CPU资源，并提供功能接口给应用框架层或应用层申请获取CPU资源的一个服务，例如：亮灭屏、关机、WakeLock管理、Dreamland(屏保模式)、休眠时间等行为。 1. PMS的启动流程PMS是在SystemServer的startBootstrapServices()中通过SystemServiceManager.">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-12-29T06:46:03.018Z">
+<meta property="article:modified_time" content="2024-01-07T03:19:52.799Z">
+<meta property="article:author" content="cq_tyl">
+<meta name="twitter:card" content="summary">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="TYL" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/favicon.ico" />
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/open-sans/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+<script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+<script src="/libs/jquery/plugins/cookie/1.4.1/jquery.cookie.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<head></head>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">TYL</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/">首页</a>
+                
+                    <a class="main-nav-link" href="/about">我的简历</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"> </button><input type="hidden" name="sitesearch" value="https://cq_tyl.gitee.io"></form>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/">首页</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">我的简历</a></td>
+                
+                <td>
+                    
+    <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><input type="hidden" name="sitesearch" value="https://cq_tyl.gitee.io"></form>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap" id='categories'>
+        <h3 class="widget-title">
+            <span>categories</span>
+            &nbsp;
+            <a id='allExpand' href="#">
+                <i class="fa fa-angle-double-down fa-2x"></i>
+            </a>
+        </h3>
+        
+        
+        
+         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android Application
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            AndroidStudio插件
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/Alibaba-Java-Coding-Guidelines%EF%BC%88%E9%98%BF%E9%87%8C%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83%E6%A3%80%E6%B5%8B%EF%BC%89/">Alibaba-Java-Coding-Guidelines（阿里代码规范检测）</a></li>  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/Studio%E6%B1%89%E5%8C%96%E6%8F%92%E4%BB%B6/">Studio汉化插件</a></li>  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/%E7%BF%BB%E8%AF%91%E6%8F%92%E4%BB%B6Translation/">翻译插件Translation</a></li>  <li class="file"><a href="/wiki/Android%20Application/AndroidStudio%E6%8F%92%E4%BB%B6/database-navigator%E6%9F%A5%E7%9C%8B%E6%95%B0%E6%8D%AE%E5%BA%93/">Database-Navigator查看数据库</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android兼容适配
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E8%99%9A%E6%8B%9F%E6%8C%89%E9%94%AE%E9%81%AE%E6%8C%A1%E5%B8%83%E5%B1%80-%E9%9A%90%E8%97%8F%E5%BA%95%E9%83%A8%E8%99%9A%E6%8B%9F%E6%8C%89%E9%94%AENavigation%E5%AE%9E%E7%8E%B0%E5%85%A8%E5%B1%8F/">虚拟按键遮挡布局-隐藏底部虚拟按键Navigation实现全屏</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E8%AE%BE%E7%BD%AEImageView%E5%9B%BE%E7%89%87%E6%97%B6,%E5%AE%BD%E5%BA%A6%E4%B8%BAmatch%E6%97%B6%E9%9C%80%E8%A6%81%E8%AE%BE%E7%BD%AEscaleType%E4%B8%BAfitXY/">设置ImageView图片时,宽度为match时需要设置scaleType为fitXY</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E9%80%82%E9%85%8D%E5%8D%8E%E4%B8%BA%E7%AD%89%E6%9C%89%E8%99%9A%E6%8B%9F%E6%8C%89%E9%94%AE%E7%9A%84%E5%B1%8F%E5%B9%95%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">适配华为等有虚拟按键的屏幕的解决方案</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%85%BC%E5%AE%B9%E9%80%82%E9%85%8D/%E5%A4%9A%E4%B8%AAfragment%E9%87%8D%E5%8F%A0%E6%97%B6%EF%BC%8C%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6%E7%A9%BF%E9%80%8F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%88viewpager+fragment%EF%BC%89/">多个Fragment重叠时，点击事件穿透解决方法（viewpager+fragment）</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android动画
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/LayoutTransition%EF%BC%88%E9%80%9A%E7%94%A8%E9%9A%90%E8%97%8F%E6%98%BE%E7%A4%BA%E5%8A%A8%E7%94%BB%EF%BC%89/">LayoutTransition（通用隐藏显示动画）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E5%85%B1%E4%BA%AB%E5%85%83%E7%B4%A0%EF%BC%88Shared-Element%EF%BC%89/">共享元素（Shared-Element）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E5%90%AF%E5%8A%A8%E9%A1%B5%E7%BC%A9%E6%94%BE%E5%8A%A8%E7%94%BB/">启动页缩放动画</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E5%B8%A7%E5%8A%A8%E7%94%BB/">帧动画</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E8%A1%A5%E9%97%B4%E5%8A%A8%E7%94%BB/">补间动画</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%8A%A8%E7%94%BB/%E6%8F%AD%E9%9C%B2%E6%95%88%E6%9E%9C/">揭露效果</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android基础
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JAV%E7%BA%BF%E7%A8%8B%E6%B1%A0/">JAV线程池</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/TCP%E5%8D%8F%E8%AE%AE%EF%BC%88Socket%EF%BC%89/">TCP协议（Socket）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Notifaction/">Notifaction</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JAVA%E9%9B%86%E5%90%88/">JAVA集合</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-%E8%AE%A1%E6%97%B6%E5%99%A8%EF%BC%88Handle+Runable-%E5%8F%AF%E9%87%8D%E7%BD%AE%E6%97%B6%E9%97%B4%E5%8F%AF%E6%9A%82%E5%81%9C%EF%BC%89/">Android-计时器（Handle+Runable-可重置时间可暂停）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JAVA%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1/">JAVA多线程之间的通信</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/JSON%E6%95%B0%E6%8D%AE%E8%A7%A3%E6%9E%90/">JSON数据解析</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Sevice%EF%BC%88%E6%9C%8D%E5%8A%A1%EF%BC%89/">Sevice（服务）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%EF%BC%88%E5%9F%BA%E7%A1%80%EF%BC%89/">类加载器（基础）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/new-Random()--%E7%94%9F%E6%88%90%E9%9A%8F%E6%9C%BA%E6%95%B0/">New-Random()--生成随机数</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/SharedPreferences%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">SharedPreferences数据存储</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-popwind/">Android-Popwind</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E5%90%8C%E6%AD%A5%E9%94%81Synchronized%E5%92%8CLock/">同步锁Synchronized和Lock</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android-ConstraintLayout-%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3/">Android-ConstraintLayout-使用详解</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/EditText%E7%84%A6%E7%82%B9%E5%8A%A8%E6%80%81%E6%8E%A7%E5%88%B6/">EditText焦点动态控制</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/StringBuffer%E5%92%8CStringBuilder/">StringBuffer和StringBuilder</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/ANR/">ANR</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-ImageView-scaleType%E7%9A%84%E5%B1%9E%E6%80%A7%E7%90%86%E8%A7%A3/">Android-ImageView-scaleType的属性理解</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/">Android事件分发</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6/">逻辑运算符</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android-%E5%80%92%E8%AE%A1%E6%97%B6/">Android-倒计时</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android%E4%B8%AD%E6%8E%A5%E5%8F%A3%E5%9B%9E%E8%B0%83-%E6%96%B9%E6%B3%95%E5%9B%9E%E8%B0%83/">Android中接口回调-方法回调</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-6-0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90/">Android-6-0动态权限</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Android-M-%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E6%9D%83%E9%99%90%E8%AF%B7%E6%B1%82/">Android-M-最简单的权限请求</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Toast%EF%BC%88%E8%87%AA%E5%AE%9A%E4%B9%89Toast%EF%BC%89/">Toast（自定义Toast）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android-6-0%E6%96%B0%E7%89%B9%E6%80%A7/">Android-6-0新特性</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1-AsyncTask/">异步任务-AsyncTask</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/AndroidManifest-xml/">AndroidManifest-Xml</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Java-Character-%E7%B1%BB%EF%BC%88%E5%8D%95%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B-%E5%AD%97%E6%AF%8D-%E6%95%B0%E5%AD%97-%E5%A4%A7%E5%B0%8F%E5%86%99%E5%88%A4%E6%96%AD%EF%BC%89/">Java-Character-类（单个字符串类型-字母-数字-大小写判断）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/BroadCastReceiver(%E5%B9%BF%E6%92%AD)/">BroadCastReceiver(广播)</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Iterator%E8%BF%AD%E4%BB%A3%E5%99%A8/">Iterator迭代器</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/UDP%E5%8D%8F%E8%AE%AE/">UDP协议</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/Activity%E5%90%91Fragment%E4%BC%A0%E5%80%BC/">Activity向Fragment传值</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%9F%BA%E7%A1%80/android%E5%AD%97%E9%97%B4%E8%B7%9D%E5%92%8C%E8%A1%8C%E9%97%B4%E8%B7%9D/">Android字间距和行间距</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android工具类
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9%E6%A1%8C%E9%9D%A2%E5%9B%BE%E6%A0%87%E5%8F%8A%E5%BA%94%E7%94%A8%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8%E5%90%8D%E7%A7%B0/">Android动态修改桌面图标及应用桌面应用名称</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%8F%91%E5%B8%83%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%93%E5%88%B0JitPack%E4%B8%8A/">Android发布自定义库到JitPack上</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/JAVA%E5%86%85%E5%AD%98%E5%88%92%E5%88%86/">JAVA内存划分</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-studio-mac-%E8%8E%B7%E5%8F%96MD5-SHA1-SHA256%E8%AF%81%E4%B9%A6%E6%8C%87%E7%BA%B9/">Android-Studio-Mac-获取MD5-SHA1-SHA256证书指纹</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-textview%E7%A9%BA%E6%A0%BC%E5%8D%A0%E4%BD%8D%E7%AC%A6%E4%BB%A5%E5%8F%8A%E4%B8%80%E4%BA%9B%E5%85%B6%E4%BB%96%E5%8D%A0%E4%BD%8D%E7%AC%A6%E6%B1%87%E6%80%BB/">Android-Textview空格占位符以及一些其他占位符汇总</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/github%E5%9B%BE%E7%89%87%E5%8A%A0%E8%BD%BD%E5%A4%B1%E8%B4%A5/">Github图片加载失败</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E5%88%A4%E6%96%AD%E6%9F%90%E4%B8%AAactivity%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E6%A0%88%E5%A0%86%E4%B8%AD/">判断某个Activity是否存在栈堆中</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Androd-%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF%E5%8A%A8/">Androd-开机自启动</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-%E5%9C%A8%E6%B2%A1%E6%9C%89usb%E8%BF%9E%E6%8E%A5%E7%BA%BF%E7%9A%84%E6%83%85%E5%86%B5%E4%B8%8B%E5%A6%82%E4%BD%95%E8%BF%9E%E6%8E%A5%E6%89%8B%E6%9C%BA%E8%AE%BE%E5%A4%87/">Android-在没有Usb连接线的情况下如何连接手机设备</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E4%BF%9D%E6%B4%BB/">Android保活</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%B0%86String%E5%88%86%E5%89%B2%E8%BD%AC%E5%8C%96%E4%B8%BAArrayList/">Android将String分割转化为ArrayList</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9B%9B%E4%B8%AA%E6%96%B9%E5%90%91%E6%BB%9A%E5%8A%A8%E7%9A%84%E8%B7%91%E9%A9%AC%E7%81%AFMarqueeViewLibrary/">Android自定义四个方向滚动的跑马灯MarqueeViewLibrary</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E7%AC%AC%E4%B8%89%E6%96%B9%E5%B8%B8%E7%94%A8%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%E6%A3%80%E6%B5%8B/">Android第三方常用安全漏洞检测</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/EventBus/">EventBus</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Glide%E8%AE%BE%E7%BD%AE%E5%9C%86%E8%A7%92%E3%80%81%E5%9C%86%E5%BD%A2%E5%9B%BE%E7%89%87%EF%BC%88%E6%97%A0%E9%9C%80%E5%86%8D%E5%88%9B%E5%BB%BA%E5%B7%A5%E5%85%B7%E7%B1%BB%E4%BA%86%EF%BC%89/">Glide设置圆角、圆形图片（无需再创建工具类了）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/GreenDao/">GreenDao</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/RxJava-RxAndroid/">RxJava-RxAndroid</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Sentry-Android%E9%9B%86%E6%88%90-%E4%BD%BF%E7%94%A8-%E6%B7%B7%E6%B7%86/">Sentry-Android集成-使用-混淆</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Svn%E5%BF%BD%E7%95%A5Android%E9%A1%B9%E7%9B%AE%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6-%E6%96%87%E4%BB%B6%E5%A4%B9/">Svn忽略Android项目上传文件-文件夹</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-RadioButton-drawableTop%E5%9B%BE%E7%89%87%E5%8F%98%E5%9E%8B/">Android-RadioButton-drawableTop图片变型</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E6%9C%AC%E5%9C%B0%E6%97%A5%E5%8E%86%E6%8F%92%E5%85%A5%E4%BA%8B%E4%BB%B6/">Android-本地日历插入事件</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E8%8E%B7%E5%8F%96assets%E5%86%85%E7%9A%84%E6%96%87%E4%BB%B6%E8%BD%ACFile/">Android-获取assets内的文件转File</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E8%BD%AF%E9%94%AE%E7%9B%98%E5%B7%A5%E5%85%B7%E7%B1%BB/">Android-软键盘工具类</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E9%80%8F%E6%98%8E%E5%BA%A6%E6%95%B0%E5%80%BC%E8%AE%B0%E5%BD%95%E8%A1%A8/">Android-透明度数值记录表</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android%E6%98%8E%E8%BF%9B%E5%BA%B75-1%E7%9B%92%E5%AD%90%E5%AE%9A%E6%97%B6%E5%BC%80%E5%85%B3%E6%9C%BA/">Android明进康5-1盒子定时开关机</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android%E8%B0%83%E8%AF%95%E8%BE%93%E5%87%BAlog%E6%89%93%E5%8D%B0%E4%BF%A1%E6%81%AF%E5%88%B0%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6/">Android调试输出log打印信息到本地文件</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/app%E6%98%AF%E5%90%A6%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C-%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81/">App是否正在运行-运行状态</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E5%9C%A8%E7%BA%BF%E5%9B%BE%E7%89%87%E5%8E%BB%E5%BA%95%E5%B7%A5%E5%85%B7---%E5%B0%86%E7%BA%AF%E8%89%B2%E8%83%8C%E6%99%AF%E7%9A%84%E5%9B%BE%E7%89%87%E8%BD%AC%E6%8D%A2%E4%B8%BA%E8%83%8C%E6%99%AF%E9%80%8F%E6%98%8E%E7%9A%84%E5%9B%BE%E7%89%87/">在线图片去底工具---将纯色背景的图片转换为背景透明的图片</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9C%86%E5%BD%A2%E5%A4%B4%E5%83%8FCircleImageView%E7%9A%84%E4%BD%BF%E7%94%A8/">自定义圆形头像CircleImageView的使用</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-Gps-%E4%BD%8D%E7%BD%AE%E4%BF%A1%E6%81%AF%E5%BC%80%E5%85%B3%E6%A3%80%E6%B5%8B/">Android-Gps-位置信息开关检测</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-eclpse%E5%BF%AB%E6%8D%B7%E9%94%AE%E5%A4%A7%E5%85%A8/">Android-Eclpse快捷键大全</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/java-android-%E9%93%B6%E8%A1%8C%E5%8D%A1%E5%8F%B7%E6%9F%A5%E8%AF%A2%E9%93%B6%E8%A1%8C%E5%8D%A1%E7%B1%BB%E5%9E%8B%E5%8F%8A%E5%90%8D%E7%A7%B0/">Java-Android-银行卡号查询银行卡类型及名称</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-RecyclerView%E5%AE%9E%E7%8E%B0%E6%A8%AA%E5%90%91%E6%BB%91%E5%8A%A8%E7%BF%BB%E9%A1%B5/">Android-RecyclerView实现横向滑动翻页</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/VAPTCHA-ANDROID-SDK%E9%83%A8%E7%BD%B2%E6%96%87%E6%A1%A3/">VAPTCHA-ANDROID-SDK部署文档</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-Jenkins%E8%87%AA%E5%8A%A8%E6%89%93%E5%8C%85/">Android-Jenkins自动打包</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%88%A4%E6%96%ADUrl%E6%A0%BC%E5%BC%8F%E6%98%AF%E5%90%A6%E6%AD%A3%E7%A1%AE/">Android判断Url格式是否正确</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/marktext/">Marktext</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E8%87%AA%E5%88%B6-9%E5%9B%BE%E5%AE%9E%E7%8E%B0%E5%92%8C%E8%AE%BE%E8%AE%A1%E5%9B%BE%E4%B8%80%E8%87%B4%E7%9A%84%E9%98%B4%E5%BD%B1%E6%95%88%E6%9E%9C/">自制-9图实现和设计图一致的阴影效果</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-pcm%E8%BD%AC%E7%A0%81wav/">Android-Pcm转码wav</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E5%B1%8F%E5%B9%95%E7%9A%84%E6%97%8B%E8%BD%AC%E8%A7%92%E5%BA%A6/">Android-获取当前屏幕的旋转角度</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E4%BF%9D%E5%AD%98%E5%9B%BE%E7%89%87%E5%88%B0%E6%9C%AC%E5%9C%B0%E7%9B%B8%E5%86%8C%E5%B9%B6%E5%8F%8A%E6%97%B6%E6%9B%B4%E6%96%B0%E6%98%BE%E7%A4%BA/">Android-保存图片到本地相册并及时更新显示</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/android-%E5%A4%9A%E8%AF%AD%E8%A8%80%E5%88%87%E6%8D%A2/">Android-多语言切换</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/adb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">Adb常用命令</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/adb%E9%85%8D%E7%BD%AE/">Adb配置</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%20SildingMenu%EF%BC%88%E4%BE%A7%E6%BB%91%E8%8F%9C%E5%8D%95%EF%BC%89%E5%B8%B8%E7%94%A8%E5%B1%9E%E6%80%A7/">Android SildingMenu（侧滑菜单）常用属性</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/Android%E5%9B%BE%E7%89%87%E6%89%8B%E5%8A%BF%E6%8E%A7%E4%BB%B6/">Android图片手势控件</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/DeBug%E8%B0%83%E8%AF%95/">DeBug调试</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/EditText%E5%BC%B9%E5%87%BA%E9%94%AE%E7%9B%98%E6%97%B6%E6%BB%9A%E5%8A%A8%E5%88%B0%E7%95%8C%E9%9D%A2%E6%8C%87%E5%AE%9A%E4%BD%8D%E7%BD%AE/">EditText弹出键盘时滚动到界面指定位置</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E6%97%A0%E9%9A%9C%E7%A2%8D%E5%8D%87%E7%BA%A7/">无障碍升级</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E5%B7%A5%E5%85%B7%E7%B1%BB/%E5%88%A4%E6%96%AD%E5%BD%93%E5%89%8D%E5%BA%94%E7%94%A8%E6%98%AF%E5%90%A6%E9%80%80%E5%88%B0%E5%90%8E%E5%8F%B0/">判断当前应用是否退到后台</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android日常记录
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Activity%E7%9A%84%E5%9B%9B%E7%A7%8D%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F/">Activity的四种启动模式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android-Elevation/">Android-Elevation</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android-%E6%A0%B9%E6%8D%AE%E9%80%97%E5%8F%B7%E5%88%86%E9%9A%94String/">Android-根据逗号分隔String</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">Android内存管理</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android%E5%B8%B8%E7%94%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">Android常用设计模式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Android%E8%87%AA%E5%AE%9A%E4%B9%89View/">Android自定义View</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Anroid-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F/">Anroid-自定义字体样式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/EditText%E4%B8%8D%E8%87%AA%E5%8A%A8%E8%8E%B7%E5%8F%96%E7%84%A6%E7%82%B9/">EditText不自动获取焦点</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/GlidePalette%E8%8E%B7%E5%8F%96%E5%9B%BE%E7%89%87%E8%83%8C%E6%99%AF%E8%89%B2/">GlidePalette获取图片背景色</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Handler/">Handler</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%AE%89%E5%85%A8%E9%80%80%E5%87%BA%E7%BA%BF%E7%A8%8B%E6%96%B9%E6%B3%95/">Java多线程编程安全退出线程方法</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-MultiDex%E5%88%86%E5%8C%85/">Android-MultiDex分包</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-textview%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9%E6%8C%87%E5%AE%9A%E6%96%87%E5%AD%97%E9%A2%9C%E8%89%B2/">Android-Textview动态修改指定文字颜色</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-%E6%A0%B9%E6%8D%AE%E4%B8%89%E7%82%B9%E5%9D%90%E6%A0%87%E6%B1%82%E4%B8%89%E8%A7%92%E5%BD%A2%E9%9D%A2%E7%A7%AF/">Android-根据三点坐标求三角形面积</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android-%E8%8B%B1%E6%96%87%E5%8D%95%E8%AF%8D%E5%8D%87%E5%BA%8F%E6%8E%92%E5%BA%8F%EF%BC%88Collections-sort()%EF%BC%89/">Android-英文单词升序排序（Collections-Sort()）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/android%E4%B8%AD%E6%9B%B4%E6%96%B0UI%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/">android中更新UI的几种方式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/viewpager%E8%87%AA%E5%AE%9A%E4%B9%89%E6%BB%91%E5%8A%A8%E9%80%9F%E5%BA%A6/">Viewpager自定义滑动速度</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E5%BA%8F%E5%88%97%E5%8C%96%E6%96%B9%E6%A1%88/">数据序列化方案</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/%E7%A8%8B%E5%BA%8F%E5%91%98%E5%BF%85%E7%9F%A5%E7%9A%846%E7%82%B9%E7%BC%96%E7%A8%8B%E7%A7%98%E8%AF%80/">程序员必知的6点编程秘诀</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E8%AE%B0%E5%BD%95/%E7%B3%BB%E7%BB%9F%E6%97%A5%E5%8E%86-%E6%8F%92%E5%85%A5%E9%87%8D%E5%A4%8D%E4%BA%8B%E4%BB%B6%E8%A7%84%E5%88%99-(android-java)/">系统日历-插入重复事件规则-(Android-Java)</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android日常问题
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android-9-0-P-http-%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E7%9A%84%E9%97%AE%E9%A2%98/">Android-9-0-P-Http-网络请求的问题</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android-FaceBook%E7%99%BB%E5%BD%95-%E5%88%86%E4%BA%AB%E8%8E%B7%E5%8F%96HashKey%EF%BC%88%E5%AF%86%E9%92%A5%E6%95%A3%E5%88%97%EF%BC%89%E7%9A%84%E7%AE%80%E5%8D%95%E6%96%B9%E6%B3%95/">Android-FaceBook登录-分享获取HashKey（密钥散列）的简单方法</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android-studio-%E7%82%B9%E5%87%BB%E8%BF%90%E8%A1%8C%E6%80%BB%E6%98%AF%E8%BF%9B%E5%85%A5Debug%E6%A8%A1%E5%BC%8F/">Android-Studio-点击运行总是进入Debug模式</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/Android%E8%BF%9B%E7%A8%8B%E4%BF%9D%E6%B4%BB-%E6%81%AF%E5%B1%8F%E5%90%8E%E5%90%8E%E5%8F%B0%E4%BF%9D%E6%8C%81%E5%AE%9A%E4%BD%8D%E3%80%81%E7%BD%91%E7%BB%9C%E8%BF%90%E8%A1%8C/">Android进程保活-息屏后后台保持定位、网络运行</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/DatePickerDialog--setMinDate-setMaxDate%E5%90%8E%E6%A0%87%E9%A2%98%E9%9A%8F%E7%9D%80%E5%8F%98%E5%8C%96-%EF%BC%88%E5%8E%BB%E6%8E%89%E6%A0%87%E9%A2%98%EF%BC%89/">DatePickerDialog--setMinDate-setMaxDate后标题随着变化-（去掉标题）</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/recyclerview-smoothScrollToPosition()%E5%B9%B3%E6%BB%91%E5%A4%B1%E6%95%88-%E6%9C%AA%E8%B5%B7%E6%95%88%E6%9E%9C/">Recyclerview-smoothScrollToPosition()平滑失效-未起效果</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/%E8%BD%AF%E9%94%AE%E7%9B%98%E5%BC%B9%E5%87%BA%E5%90%8E%E5%B8%83%E5%B1%80%E4%B8%8A%E7%A7%BB/">软键盘弹出后布局上移</a></li>  <li class="file"><a href="/wiki/Android%20Application/Android%E6%97%A5%E5%B8%B8%E9%97%AE%E9%A2%98/studio%E6%8F%92%E4%BB%B6%E4%B8%8B%E8%BD%BD%E6%85%A2%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/">Studio插件下载慢解决方法</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Material-Design新控件
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/AppbarLayout/">AppbarLayout</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/Chronometer%E8%AE%A1%E6%97%B6%E5%99%A8/">Chronometer计时器</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/FloatingActionButton(%E6%82%AC%E6%B5%AE%E6%8C%89%E9%92%AE)/">FloatingActionButton(悬浮按钮)</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/Snackbar/">Snackbar</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/SwitchCompat/">SwitchCompat</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/TabLayout/">TabLayout</a></li>  <li class="file"><a href="/wiki/Android%20Application/Material-Design%E6%96%B0%E6%8E%A7%E4%BB%B6/TextInputLayout/">TextInputLayout</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            android-https双向验证
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/Glide-okhttps%E8%AF%81%E4%B9%A6%E9%AA%8C%E8%AF%81%E5%85%A8%E5%B1%80%E9%85%8D%E7%BD%AE/">Glide-Okhttps证书验证全局配置</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/P12%E8%AF%81%E4%B9%A6%E8%BD%ACBKS%E8%AF%81%E4%B9%A6/">P12证书转BKS证书</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81-%E6%80%BB%E7%BB%93/">Android-Https双向验证-总结</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-okhttps%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/">Android-Okhttps双向验证</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-webView%E7%9A%84%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/">Android-webView的双向验证</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android-%E5%8D%95%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81%E7%9F%A5%E8%AF%86%E7%82%B9/">Android-单双向验证知识点</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/android%E8%8E%B7%E5%8F%96%E8%AF%81%E4%B9%A6%E6%96%87%E4%BB%B6/">Android获取证书文件</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/https%E5%8F%8C%E5%90%91%E8%AE%A4%E8%AF%81%E8%AF%81%E4%B9%A6%E7%94%9F%E6%88%90/">Https双向认证证书生成</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/phpstudy%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E6%9C%8D%E5%8A%A1%E5%99%A8/">Phpstudy搭建本地服务器</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-https%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81/%E9%85%8D%E7%BD%AE%E5%AE%8C%E6%88%90%E5%90%8E%E7%9A%84%E6%B5%8B%E8%AF%95/">配置完成后的测试</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            android-加密-解密-数据压缩
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/android-%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86-%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/android-%E5%8E%9F%E7%94%9Fbase64/">Android-原生Base64</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86-%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/10%E8%BF%9B%E5%88%B6%E8%BD%AC20%E8%BF%9B%E5%88%B6%EF%BC%88%E4%BB%BB%E6%84%8F%E8%BF%9B%E5%88%B6-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AD%97%E7%AC%A6%EF%BC%89/">10进制转20进制（任意进制-自定义字符）</a></li>  <li class="file"><a href="/wiki/Android%20Application/android-%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86-%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/%E5%8E%8B%E7%BC%A9%E7%AE%97%E6%B3%95%E8%BF%9B%E8%A1%8C%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8E%8B%E7%BC%A9/">压缩算法进行字符串压缩</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            rxjava2
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20Application/rxjava2/Rxjava2%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">Rxjava2的基本使用</a></li>  <li class="file"><a href="/wiki/Android%20Application/rxjava2/rxjava2%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">Rxjava2基本概念</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+                    </li> 
+                    
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            Android FrameWork
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            Framework源码分析
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory open">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder-open"></i>
+                            &nbsp;
+                            Android 13
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            InPutManagerService
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/3.InputReader%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86/">3.InputReader事件处理</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/1.InputFlinger%E7%9A%84%E5%90%AF%E5%8A%A8/">1.InputFlinger的启动</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/2.EventHub%E8%8E%B7%E5%8F%96%E4%BA%8B%E4%BB%B6/">2.EventHub获取事件</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/4.InputDispatcher%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/">4.InputDispatcher事件分发</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/InPutManagerService/5.%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E5%9C%A8%E5%BA%94%E7%94%A8%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%88%86%E5%8F%91%E5%92%8C%E5%A4%84%E7%90%86/">5.触摸事件在应用进程的分发和处理</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            WMSAMS
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/1.%E7%AA%97%E5%8F%A3%E5%B1%82%E7%BA%A7%20_%E5%AE%B9%E5%99%A8%E7%B1%BB/">1.窗口层级 _容器类</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/2.%E7%AA%97%E5%8F%A3%E5%B1%82%E7%BA%A7%20_%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84%E6%A0%91%E7%9A%84%E6%9E%84%E5%BB%BA/">2.窗口层级 _层级结构树的构建</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/3.%E7%AA%97%E5%8F%A3%E5%B1%82%E7%BA%A7_%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84%E6%A0%91%E6%B7%BB%E5%8A%A0%E7%AA%97%E5%8F%A3/">3.窗口层级_层级结构树添加窗口</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/WMSAMS/4.WMS%E7%AA%97%E5%8F%A3%E7%9B%B8%E5%85%B3%E6%B5%81%E7%A8%8B/"></a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/1.android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BSeLinux%E6%9D%83%E9%99%90%E4%BB%8B%E7%BB%8D/">1.Android13启动流程之SeLinux权限介绍.md</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/2.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BFirstStageMain%E9%98%B6%E6%AE%B5/">2.Android13启动流程之FirstStageMain阶段</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/3.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BSecondStageMain%E9%98%B6%E6%AE%B5/">3.Android13启动流程之SecondStageMain阶段</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/4.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BZygote%E5%92%8CSystemServer%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">4.Android13启动流程之Zygote和SystemServer启动流程</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/5.Android13%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8BSystemServer%E5%86%85%E9%83%A8%E9%80%BB%E8%BE%91%E5%88%86%E6%9E%90/">5.android13启动流程之SystemServer内部逻辑分析.md</a></li>  <li class="file active"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/6.PowerManagerService%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%92%8C%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95/">6.PowerManagerService启动流程和核心方法</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/7.%E7%82%B9%E5%87%BB%E6%A1%8C%E9%9D%A2APP%E5%9B%BE%E6%A0%87%EF%BC%8C%E5%88%B0APP%E7%95%8C%E9%9D%A2%E6%98%BE%E7%A4%BA%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90(%E4%B8%80)/">7.点击桌面APP图标，到APP界面显示流程分析</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android%2013/8.%E7%82%B9%E5%87%BB%E6%A1%8C%E9%9D%A2APP%E5%9B%BE%E6%A0%87%EF%BC%8C%E5%88%B0APP%E7%95%8C%E9%9D%A2%E6%98%BE%E7%A4%BA%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90(%E4%BA%8C)/">8.点击桌面APP图标，到APP界面显示流程分析(二)</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Framework相关
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/1.Handler%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">Handler消息机制原理解析</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/2.Binder%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">Binder原理解析</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/ANR%E7%9A%84%E4%BA%A7%E7%94%9F%E6%9C%BA%E5%88%B6/">ANR的产生机制</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E7%9B%B8%E5%85%B3/SystemUI/">SystemUI</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/Android%20FrameWork/LINUX%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4/">LINUX基础命令</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/VIM%E4%BD%BF%E7%94%A8/">VIM使用</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/adb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">Adb常用命令</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1/">自定义服务</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/%E4%BD%BF%E7%94%A8%20git%20add%20-p%20%E6%95%B4%E7%90%86%20patch/">使用Git Add -P 整理 Patch</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/dumpsys%E5%91%BD%E4%BB%A4%E7%94%A8%E6%B3%95/">Dumpsys命令用法</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/AOSP%20Repo%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99/">AOSP Repo 命令参考资料</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/ADB%E5%92%8CMonkey%E6%B5%8B%E8%AF%95/">ADB和Monkey测试</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/AOSP%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">AOSP常用编译和查找命令文件</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Eclipse%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/">Eclipse安装教程</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Windows%E5%92%8CUbuntu%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85/">Windows和Ubuntu双系统安装</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Android%20%E6%BA%90%E7%A0%81%E6%A0%B9%E7%9B%AE%E5%BD%95%E4%BB%8B%E7%BB%8D/">Android源码根目录介绍</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Framework%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98/">Framework遇到的问题</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/%E5%AF%BC%E5%85%A5%E7%B3%BB%E7%BB%9F%E6%BA%90%E7%A0%81%E5%88%B0Studio/">导入系统源码到Studio</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Linux%20%E8%AE%BE%E7%BD%AEswap/">Linux设置swap</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/wine%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8/">Wine安装及使用</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/Selinux&SeAndroid/">Selinux&SeAndroid</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/rc%E6%96%87%E4%BB%B6%E8%AF%AD%E6%B3%95%E8%A7%84%E5%88%99/">Rc文件语法规则</a></li>  <li class="file"><a href="/wiki/Android%20FrameWork/ASFP%20(android%20studio%20for%20platform)%E4%BD%BF%E7%94%A8/">ASFP (Android Studio for Platform)使用</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android进阶
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Jetpack
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/Jetpack%E6%9E%B6%E6%9E%84%E7%BB%84%E4%BB%B6%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%B2%BE%E9%80%9A/">Jetpack架构组件从入门到精通</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/1.LifeCycle/">1.LifeCycle</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/2.LiveData/">2.LiveData</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/3.DataBinding/">3.DataBinding</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/4.Dagger2/">4.Dagger2</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/5.ViewModle/">5.ViewModle</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/6.Room/">6.Room</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/7.Hilt/">7.Hilt</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/8.Paging/">8.Paging</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/9.WorkManager/">9.WorkManager</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/Jetpack/10.Navigation/">10.Navigation</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            NDK
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Android进阶之旅
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/12_makefile/">12_makefile</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/16_1_Cmake%E8%AF%AD%E6%B3%95/">16_1_Cmake语法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/16_2_Cmake%E9%A1%B9%E7%9B%AE%E5%B8%B8%E7%94%A8/">16_2_Cmake项目常用</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/19_NDK%E9%9D%A2%E8%AF%95%E9%A2%98/">19_NDK面试题</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/11_%E7%BC%96%E8%AF%91%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E5%8E%9F%E7%90%86/">11_编译流程详解/静态库与动态库原理.md</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/13_android.mk/">13_android.mk</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/14_Application.mk/">14_Application.mk</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/15_Android.mk%E5%92%8CAndroid.bp%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB/">15_Android.mk和Android.bp对应关系.md</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/17_Shell%E8%84%9A%E6%9C%AC/">17_Shell脚本</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/18_NDK%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/">18_NDK环境配置</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/1_c%E5%9F%BA%E7%A1%80/">1_c基础</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/3_jni_native%E5%B1%82%E6%9E%84%E5%BB%BAjava%E5%AF%B9%E8%B1%A1/">3_jni_native层构建java对象</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/2_jni%E5%9F%BA%E7%A1%80/"></a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/4_jni_%E6%95%B0%E7%BB%84%E7%9A%84%E7%BB%86%E8%8A%82%E5%A4%84%E7%90%86/">4_jni_数组的细节处理</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/5_c%E8%BF%9B%E9%98%B6_%E5%86%85%E5%AD%98%E5%9B%9B%E9%A9%B1%E6%A8%A1%E5%9E%8B/">5_c进阶_内存四驱模型</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/7_%E9%93%B6%E8%A1%8C%E5%8D%A1%E8%AF%86%E5%88%AB/">7_银行卡识别.md</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/6_c++%E5%9F%BA%E7%A1%80/">6_c++基础</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/8_%E7%AE%97%E6%B3%95/">8_算法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/9_%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80/">9_音视频基础</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/Android%E8%BF%9B%E9%98%B6%E4%B9%8B%E6%97%85/20.jni%E6%96%B9%E6%B3%95%E5%A4%A7%E5%85%A8%E5%8F%8A%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/">20.jni方法大全及使用示例</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            蒋超大佬扫盲
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/1.%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">1.基础知识</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/CMake%E8%AF%AD%E6%B3%95/">CMake语法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/2.Cmake%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">2.Cmake基础知识</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/3.JNI%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/">3.JNI数据类型</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/4.JavaVM/">JavaVM</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/5.OPUS%E7%BC%96%E8%AF%91/">5.opus编译</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/6.libusb/">6.libusb</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/7.mmkv%E7%BC%96%E8%AF%91/">7.mmkv编译</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/8.mqtt/">8.mqtt</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/9.%E5%87%BD%E6%95%B0%E7%AD%BE%E5%90%8D%E5%8F%8Andk%E8%B0%83%E7%94%A8java%E6%96%B9%E6%B3%95/">9.函数签名及ndk调用java方法</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/NDK/%E8%92%8B%E8%B6%85%E5%A4%A7%E4%BD%AC%E6%89%AB%E7%9B%B2/10.%E7%BA%BF%E7%A8%8B/">10.线程</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            性能优化
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/leakcanary%E7%9A%84%E4%BD%BF%E7%94%A8/">Leakcanary的使用</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/1.App%E6%80%A7%E8%83%BD%E6%A6%82%E8%A7%88%E4%B8%8E%E5%B9%B3%E5%8F%B0%E5%8C%96%E5%AE%9E%E8%B7%B5/">1.App性能概览与平台化实践</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/2.App%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96/">2.App启动优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/3.%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/">3.内存优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/4.%E5%B8%83%E5%B1%80%E4%BC%98%E5%8C%96/">4.布局优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/5.%E5%8D%A1%E9%A1%BF%E4%BC%98%E5%8C%96/">5.卡顿优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/6.%E7%BA%BF%E7%A8%8B%E4%BC%98%E5%8C%96/">6.线程优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/7.%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/">7.网络优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/8.%E7%94%B5%E9%87%8F%E4%BC%98%E5%8C%96/">8.电量优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/9.%E7%98%A6%E8%BA%AB%E4%BC%98%E5%8C%96/">9.瘦身优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/10.%E7%A8%B3%E5%AE%9A%E6%80%A7%E4%BC%98%E5%8C%96/">10.稳定性优化</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/11.%E4%B8%93%E9%A1%B9%E6%8A%80%E6%9C%AF%E4%BC%98%E5%8C%96/">11.专项技术优化</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/java%20%E5%8F%8D%E5%B0%84%E5%8F%8A%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/">Java 反射及代理模式初步学习</a></li>  <li class="file"><a href="/wiki/Android%E8%BF%9B%E9%98%B6/%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E5%BA%93Retrofit/">网络请求库Retrofit</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            C++
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            C++教程从0到1入门编程
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/C++/C++%E6%95%99%E7%A8%8B%E4%BB%8E0%E5%88%B01%E5%85%A5%E9%97%A8%E7%BC%96%E7%A8%8B/1.C++%E5%9F%BA%E7%A1%80/">C++基础</a></li>  <li class="file"><a href="/wiki/C++/C++%E6%95%99%E7%A8%8B%E4%BB%8E0%E5%88%B01%E5%85%A5%E9%97%A8%E7%BC%96%E7%A8%8B/2.C++%E6%8F%90%E9%AB%98/">C++提高</a></li>  <li class="file"><a href="/wiki/C++/C++%E6%95%99%E7%A8%8B%E4%BB%8E0%E5%88%B01%E5%85%A5%E9%97%A8%E7%BC%96%E7%A8%8B/3.C++%E6%A0%B8%E5%BF%83/">C++核心</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/C++/window%E7%B3%BB%E7%BB%9F_vscode%E4%B8%AD%E9%85%8D%E7%BD%AE%20c++%E7%8E%AF%E5%A2%83/">Vscode中配置 C++环境</a></li>  <li class="file"><a href="/wiki/C++/%E8%BD%BB%E6%9D%BE%E6%90%9E%E5%AE%9AC++%E8%AF%AD%E8%A8%80/">轻松搞定C++语言</a></li>  <li class="file"><a href="/wiki/C++/%E8%BD%BB%E6%9D%BE%E6%90%9E%E5%AE%9AC%E8%AF%AD%E8%A8%80(%E6%8F%90%E9%AB%98%E7%AF%87)/">轻松搞定C语言(提高篇)</a></li>  <li class="file"><a href="/wiki/C++/%E5%BD%BB%E5%BA%95%E6%90%9E%E5%AE%9AC%E6%8C%87%E9%92%88/">彻底搞定C指针</a></li>  <li class="file"><a href="/wiki/C++/Linux%E7%B3%BB%E7%BB%9F_vscode%E4%B8%AD%E9%85%8D%E7%BD%AE%20c++%E7%8E%AF%E5%A2%83/">Linux系统_vscode中配置 c++环境.md</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            其他笔记
+                        </a>
+                         <ul class="unstyled" id="tree" > 
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            Flutter
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Android-Studio%E9%85%8D%E7%BD%AEFlutter/">Android-Studio配置Flutter</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter(Android-%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/">Flutter(Android-混合开发)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter-Decoration%E8%83%8C%E6%99%AF%E8%AE%BE%E5%AE%9A%EF%BC%88%E8%BE%B9%E6%A1%86%E3%80%81%E5%9C%86%E8%A7%92%E3%80%81%E9%98%B4%E5%BD%B1%E3%80%81%E5%BD%A2%E7%8A%B6%E3%80%81%E6%B8%90%E5%8F%98%E3%80%81%E8%83%8C%E6%99%AF%E5%9B%BE%E5%83%8F%E7%AD%89%EF%BC%89/">Flutter-Decoration背景设定（边框、圆角、阴影、形状、渐变、背景图像等）</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter-%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E5%92%8C%E9%A1%B9%E7%9B%AE%E8%B5%84%E6%BA%90/">Flutter-目录结构和项目资源</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter%E4%B8%AD%E7%9A%84%E6%89%8B%E5%8A%BF%E5%A4%84%E7%90%86/">Flutter中的手势处理</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter%E4%B9%8BScaffold/">Flutter之Scaffold</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter-%E6%8E%A7%E4%BB%B6%E4%B9%8B-MaterialApp/">Flutter-控件之-MaterialApp</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/Flutter%E4%BB%A3%E7%A0%81%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/">Flutter代码开发规范</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/StatelessWidget%E5%92%8CStatefulWidget%E7%9A%84%E5%8C%BA%E5%88%AB/">StatelessWidget和StatefulWidget的区别</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-BottomAppBar-%EF%BC%88%E4%B8%8D%E8%A7%84%E5%88%99%E5%BA%95%E9%83%A8%E5%B7%A5%E5%85%B7%E6%A0%8F%EF%BC%89/">Flutter-BottomAppBar-（不规则底部工具栏）</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-BottomNavigationBar%E7%B1%BB/">Flutter-BottomNavigationBar类</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Chip/">Flutter-Chip</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-ExpansionTile(%E9%97%AD%E5%90%88%E5%88%97%E8%A1%A8)/">Flutter-ExpansionTile(闭合列表)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Flexible%E5%92%8C-Expanded/">Flutter-Flexible和-Expanded</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-ListTile(06)/">Flutter-ListTile(06)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Padding/">Flutter-Padding</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Stack(%E5%B1%82%E5%8F%A0%E6%8E%A7%E4%BB%B6)/">Flutter-Stack(层叠控件)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-Text(02)/">Flutter-Text(02)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-card%EF%BC%88%E5%8D%A1%E7%89%87%E5%B8%83%E5%B1%80%EF%BC%89/">Flutter-Card（卡片布局）</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-gridView/">Flutter-gridView</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-listview(07)/">Flutter-Listview(07)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-mainAxisAlignment%E5%92%8CcrossAxisAlignment/">Flutter-mainAxisAlignment和crossAxisAlignment</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%8D%95%E9%80%89%E6%A1%86%E5%92%8C%E5%A4%8D%E9%80%89%E6%A1%86(05)/">Flutter-单选框和复选框(05)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%9B%BE%E7%89%87(04)/">Flutter-图片(04)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%AF%BC%E8%88%AA%E8%BF%94%E5%9B%9E%E6%8B%A6%E6%88%AAWillPopScope(%E9%98%B2%E8%AF%AF%E8%A7%A6)/">Flutter-导航返回拦截WillPopScope(防误触)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%B1%82%E5%8F%A0%E5%B8%83%E5%B1%80Stack%E3%80%81Positioned/">Flutter-层叠布局Stack、Positioned</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E5%BC%B9%E6%80%A7%E5%B8%83%E5%B1%80Flex/">Flutter-弹性布局Flex</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E6%8C%89%E9%92%AE(03)/">Flutter-按钮(03)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E6%B5%81%E5%BC%8F%E5%B8%83%E5%B1%80Wrap%E3%80%81Flow/">Flutter-流式布局Wrap、Flow</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E7%BA%BF%E6%80%A7%E5%B8%83%E5%B1%80Row%E5%92%8CColumn-1/">Flutter-线性布局Row和Column-1</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E7%BA%BF%E6%80%A7%E5%B8%83%E5%B1%80Row%E5%92%8CColumn/">Flutter-线性布局Row和Column</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E8%BE%93%E5%85%A5%E6%A1%86%E5%92%8C%E6%A0%87%E7%82%B9/">Flutter-输入框和标点</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter-%E9%A2%9C%E8%89%B2%E6%B8%90%E5%8F%98/">Flutter-颜色渐变</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8(01)/">Flutter基础使用(01)</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/Flutter/flutter%E7%AE%80%E4%BB%8B/">Flutter简介</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            QT
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/QT/QT-Creator%E5%AE%89%E8%A3%85/">QT-Creator安装</a></li>  </ul> 
+                    </li> 
+                    
+                    <li class="directory">
+                        <a href="#" data-role="directory">
+                            <i class="fa fa-folder"></i>
+                            &nbsp;
+                            svn配置及使用
+                        </a>
+                         <ul class="unstyled" id="tree" >  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E4%B8%8B%E8%BD%BD%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93/">Svn下载远程仓库</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/">Svn客户端安装和配置</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/">Svn服务端安装和配置</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/svn%E9%85%8D%E7%BD%AE%E5%8F%8A%E4%BD%BF%E7%94%A8/svn%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/">Svn的基本操作</a></li>  </ul> 
+                    </li> 
+                     <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/win11%E8%87%AA%E5%8A%A8%E5%85%B3%E6%9C%BA/">Win11自动关机</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/%E6%88%91%E7%9A%84%E7%AE%80%E5%8E%86/">我的简历</a></li>  <li class="file"><a href="/wiki/%E5%85%B6%E4%BB%96%E7%AC%94%E8%AE%B0/csdn%E6%96%87%E7%AB%A0%E5%AF%BC%E5%87%BAmarkdown/">Csdn文章导出到本地markdown</a></li>  </ul> 
+                    </li> 
+                     </ul> 
+    </div>
+    <script>
+        $(document).ready(function() {
+            var iconFolderOpenClass  = 'fa-folder-open';
+            var iconFolderCloseClass = 'fa-folder';
+            var iconAllExpandClass = 'fa-angle-double-down';
+            var iconAllPackClass = 'fa-angle-double-up';
+            // Handle directory-tree expansion:
+            // 左键单独展开目录
+            $(document).on('click', '#categories a[data-role="directory"]', function (event) {
+                event.preventDefault();
+
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var subtree = $(this).siblings('ul');
+                icon.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if (expanded) {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideUp({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderCloseClass);
+                } else {
+                    if (typeof subtree != 'undefined') {
+                        subtree.slideDown({ duration: 100 });
+                    }
+                    icon.addClass(iconFolderOpenClass);
+                }
+            });
+            // 右键展开下属所有目录
+            $('#categories a[data-role="directory"]').bind("contextmenu", function(event){
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconFolderOpenClass);
+                var listNode = $(this).siblings('ul');
+                var subtrees = $.merge(listNode.find('li ul'), listNode);
+                var icons = $.merge(listNode.find('.fa'), icon);
+                icons.removeClass(iconFolderOpenClass).removeClass(iconFolderCloseClass);
+                if(expanded) {
+                    subtrees.slideUp({ duration: 100 });
+                    icons.addClass(iconFolderCloseClass);
+                } else {
+                    subtrees.slideDown({ duration: 100 });
+                    icons.addClass(iconFolderOpenClass);
+                }
+            })
+            // 展开关闭所有目录按钮
+            $(document).on('click', '#allExpand', function (event) {
+                event.preventDefault();
+                
+                var icon = $(this).children('.fa');
+                var expanded = icon.hasClass(iconAllExpandClass);
+                icon.removeClass(iconAllExpandClass).removeClass(iconAllPackClass);
+                if(expanded) {
+                    $('#sidebar .fa.fa-folder').removeClass('fa-folder').addClass('fa-folder-open')
+                    $('#categories li ul').slideDown({ duration: 100 });
+                    icon.addClass(iconAllPackClass);
+                } else {
+                    $('#sidebar .fa.fa-folder-open').removeClass('fa-folder-open').addClass('fa-folder')
+                    $('#categories li ul').slideUp({ duration: 100 });
+                    icon.addClass(iconAllExpandClass);
+                }
+            });  
+        });
+    </script>
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+            <section id="main"><article id="post-Android FrameWork/Framework源码分析/Android 13/6.PowerManagerService启动流程和核心方法" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+                    <div class="article-meta">
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/Android-FrameWork/">Android FrameWork</a><i class="fa fa-angle-right"></i><a class="article-category-link" href="/categories/Android-FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">Framework源码分析</a><i class="fa fa-angle-right"></i><a class="article-category-link" href="/categories/Android-FrameWork/Framework%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Android-13/">Android 13</a>
+    </div>
+
+                        
+                        
+  
+
+
+
+                        
+                        
+                    </div>
+                
+                
+   
+
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+        
+            
+        
+        
+            <p> PowerManagerService(简称PMS)主要是负责协调、管理设备CPU资源，并提供功能接口给应用框架层或应用层申请获取CPU资源的一个服务，例如：亮灭屏、关机、WakeLock管理、Dreamland(屏保模式)、休眠时间等行为。</p>
+<h3 id="1-PMS的启动流程"><a href="#1-PMS的启动流程" class="headerlink" title="1. PMS的启动流程"></a>1. <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=PMS&spm=1001.2101.3001.7020">PMS</a>的启动流程</h3><p>PMS是在SystemServer的startBootstrapServices()中通过SystemServiceManager.startService()启动，很多服务依赖PMS服务，所以它需要尽早的启动并注册到ServiceManage中，所以它在startBootstrapServices()中来启动</p>
+<pre><code>frameworks/base/services/java/com/android/server/SystemServer.java
+        
+    private void startBootstrapServices(@NonNull TimingsTraceAndSlog t) &#123;
+        t.traceBegin(&quot;StartPowerManager&quot;);
+        mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);
+        t.traceEnd();
+    &#125;
+</code></pre>
+<p>SystemServiceManager.startService()通过反射拿到PowerManagerService对象</p>
+<pre><code>frameworks/base/services/core/java/com/android/server/SystemServiceManager.java
+
+    public &lt;T extends SystemService&gt; T startService(Class&lt;T&gt; serviceClass) &#123;
+        try &#123;
+            final String name = serviceClass.getName();
+            final T service;
+            try &#123;
+                //获取类构造方法，构造对应对象
+                Constructor&lt;T&gt; constructor = serviceClass.getConstructor(Context.class);
+                service = constructor.newInstance(mContext);
+            &#125; catch (InstantiationException ex) &#123;
+                throw new RuntimeException(&quot;Failed to create service &quot; + name
+                        + &quot;: service could not be instantiated&quot;, ex);
+            &#125; catch (IllegalAccessException ex) &#123;
+                ...
+            &#125;
+            //调用startService启动服务
+            startService(service);
+            //返回服务对象
+            return service;
+        &#125; finally &#123;
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+        &#125;
+    &#125;
+
+    public void startService(@NonNull final SystemService service) &#123;
+        // Check if already started
+        String className = service.getClass().getName();
+
+        mServiceClassnames.add(className);
+
+        // Register it.
+        //注册服务
+        mServices.add(service);
+
+        // Start it.
+        long time = SystemClock.elapsedRealtime();
+        try &#123;
+            //调用服务的onStart()方法启动服务
+            service.onStart();
+        &#125; catch (RuntimeException ex) &#123;
+            throw new RuntimeException(&quot;Failed to start service &quot; + service.getClass().getName()
+                    + &quot;: onStart threw an exception&quot;, ex);
+        &#125;
+        warnIfTooLong(SystemClock.elapsedRealtime() - time, service, &quot;onStart&quot;);
+    &#125;
+</code></pre>
+<p>将服务加入mServices列表中，然后调用服务的onStart()方法，mServices列表是管理着所有需要接收系统启动过程中生命周期的服务</p>
+<h4 id="1-1-PowerManagerService构造方法"><a href="#1-1-PowerManagerService构造方法" class="headerlink" title="1.1 PowerManagerService构造方法"></a>1.1 PowerManagerService构造方法</h4><pre><code>frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    public PowerManagerService(Context context) &#123;
+        this(context, new Injector());  //内部类Injector对象，管理创建其他对象
+    &#125;
+
+    PowerManagerService(Context context, Injector injector) &#123;
+        super(context);
+
+        mContext = context;
+        mBinderService = new BinderService();  //用于IPC交互, BinderService 继承于 IPowerManager.Stub
+        mLocalService = new LocalService();  //用户跨线程交互(SystemServer进程内部)
+        //创建一个NativeWrapper对象，管理所有的native交互
+        mNativeWrapper = injector.createNativeWrapper();
+        //创建SystemPropertiesWrapper对象，用于获取系统属性等信息
+        mSystemProperties = injector.createSystemPropertiesWrapper();
+        mClock = injector.createClock();
+        //内部类Injector对象，管理创建其他对象
+        mInjector = injector;
+        
+        //创建PMS主线程，优先级为DISPLAY级别
+        mHandlerThread = new ServiceThread(TAG,
+                Process.THREAD_PRIORITY_DISPLAY, /* allowIo= */ false);
+        mHandlerThread.start();  //启动主线程
+        //创建PMS主线程Handler
+        mHandler = injector.createHandler(mHandlerThread.getLooper(),
+                new PowerManagerHandlerCallback());
+        //用于管理Settings.Global下的常量
+        mConstants = new Constants(mHandler);
+        //创建AmbientDisplayConfiguration对象，管理一些显示配置，如AOD
+        mAmbientDisplayConfiguration = mInjector.createAmbientDisplayConfiguration(context);
+        //创建AmbientDisplaySuppressionController对象，用于管理AmbientDisplay显示相关，和AOD显示有关
+        mAmbientDisplaySuppressionController =
+                mInjector.createAmbientDisplaySuppressionController(context);
+        //创建AttentionDetector对象，用来检查用户活动是否需要再更新
+        mAttentionDetector = new AttentionDetector(this::onUserAttention, mLock);
+        
+        mFaceDownDetector = new FaceDownDetector(this::onFlip);
+        
+        mScreenUndimDetector = new ScreenUndimDetector();
+        //创建BatterySavingStats对象，用来记录电池耗电率
+        mBatterySavingStats = new BatterySavingStats(mLock);
+        //创建BatterySaverPolicy对象，管理一些省电策略
+        mBatterySaverPolicy =
+                mInjector.createBatterySaverPolicy(mLock, mContext, mBatterySavingStats);
+        //创建BatterySaverController对象，管理省电策略的切换
+        mBatterySaverController = mInjector.createBatterySaverController(mLock, mContext,
+                mBatterySaverPolicy, mBatterySavingStats);
+        //创建BatterySaverStateMachine对象，负责省电策略的开启/关闭
+        mBatterySaverStateMachine = mInjector.createBatterySaverStateMachine(mLock, mContext,
+                mBatterySaverController);
+
+        mLowPowerStandbyController = mInjector.createLowPowerStandbyController(mContext,
+                Looper.getMainLooper());
+                
+        mInattentiveSleepWarningOverlayController =
+                mInjector.createInattentiveSleepWarningController();
+
+        mAppOpsManager = injector.createAppOpsManager(mContext);
+
+        mPowerGroupWakefulnessChangeListener = new PowerGroupWakefulnessChangeListener();
+        
+        ...		//获取一些配置初始值
+        
+        synchronized (mLock) &#123;
+            //创建SuspendBlockerImpl对象，&quot;PowerManagerService.Booting&quot;类型对象负责在开机时负责保活CPU
+            mBootingSuspendBlocker =
+                    mInjector.createSuspendBlocker(this, &quot;PowerManagerService.Booting&quot;);
+           //创建SuspendBlockerImpl对象，WakeLock的最终反映，&quot;PowerManagerService.WakeLocks&quot;类型对象负责保活CPU
+            mWakeLockSuspendBlocker =
+                    mInjector.createSuspendBlocker(this, &quot;PowerManagerService.WakeLocks&quot;);
+            //创建SuspendBlockerImpl对象，&quot;PowerManagerService.Display&quot;类型对象负责保持屏幕常亮
+            mDisplaySuspendBlocker =
+                    mInjector.createSuspendBlocker(this, &quot;PowerManagerService.Display&quot;);
+            //申请mBootingSuspendBlocker，保持开机启动过程CPU资源
+            if (mBootingSuspendBlocker != null) &#123;
+                mBootingSuspendBlocker.acquire();
+                mHoldingBootingSuspendBlocker = true;
+            &#125;
+            //申请mDisplaySuspendBlocker，保持屏幕常亮
+            if (mDisplaySuspendBlocker != null) &#123;
+                mDisplaySuspendBlocker.acquire(HOLDING_DISPLAY_SUSPEND_BLOCKER);
+                mHoldingDisplaySuspendBlocker = true;
+            &#125;
+            //auto-suspend 模式是否可用
+            mHalAutoSuspendModeEnabled = false;
+            //是否是可交互状态
+            mHalInteractiveModeEnabled = true;
+            //设置设备状态为唤醒状态
+            mWakefulnessRaw = WAKEFULNESS_AWAKE;
+            //静默模式，会控制背光的点亮，使用场景不多
+            sQuiescent = mSystemProperties.get(SYSTEM_PROPERTY_QUIESCENT, &quot;0&quot;).equals(&quot;1&quot;)
+                    || InitProperties.userspace_reboot_in_progress().orElse(false);
+                    
+            //mNativeWrapper对象进行native层初始化工作
+            mNativeWrapper.nativeInit(this);
+            mNativeWrapper.nativeSetAutoSuspend(false);  //设置auto suspend状态
+            mNativeWrapper.nativeSetPowerMode(Mode.INTERACTIVE, true);  //设置interactive状态
+            mNativeWrapper.nativeSetPowerMode(Mode.DOUBLE_TAP_TO_WAKE, false);  //设置双击唤醒模式状态
+            mInjector.invalidateIsInteractiveCaches();
+        &#125;
+    &#125;
+</code></pre>
+<p>构造方法主要做了几件事：</p>
+<ol>
+<li>创建用于IPC的BinderService对象和system_server进程内跨线程交互的LocalService对象；</li>
+<li>创建PMS的主线程，并使用该HandlerThread的Looper实例化PowerManagerHandler，将作为PMS主线程Handler进行Message的处理</li>
+<li>相关配置参数的读取，如系统配置各种亮度参数</li>
+<li>获取了三个Suspend锁对象，SuspendBlocker是一种锁机制，上层申请的wakelock锁在PMS中都会反映为SuspendBlocker锁</li>
+<li>通过mNativeWrapper对象和底层进行状态交互</li>
+</ol>
+<h4 id="1-2-onStart-中注册发布服务"><a href="#1-2-onStart-中注册发布服务" class="headerlink" title="1.2 onStart()中注册发布服务"></a>1.2 onStart()中注册发布服务</h4><p>执行完构造方法后接着执行了onStart()</p>
+<pre><code>frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    @Override
+    public void onStart() &#123;
+        //向ServiceManager进程注册当前服务mBinderService(BinderServic才是PMS的Binder服务端)
+        publishBinderService(Context.POWER_SERVICE, mBinderService, /* allowIsolated= */ false,
+                DUMP_FLAG_PRIORITY_DEFAULT | DUMP_FLAG_PRIORITY_CRITICAL);
+        //发布本地服务提供给SystemServer进程中其他组件访问
+        publishLocalService(PowerManagerInternal.class, mLocalService);
+        //添加watchdog监听
+        Watchdog.getInstance().addMonitor(this);
+        Watchdog.getInstance().addThread(mHandler);
+    &#125;
+</code></pre>
+<p>这个方法中会进行对PMS的Binder服务和Local服务的注册，BinderService注册后，其他模块中就可以通过ServiceManager获取到对应的Binder对象，进行IPC通信；LocalService注册后，在system_server进程内就可以通过获取LocalService对象跨线程交互。<br>PMS中的BinderService，是继承自IPowerManager.Stub的一个内部类BinderService，IPowerManager.Stub继承自Binder并且实现了IPowerManager，因此，PMS和其他模块的跨进程交互，实际上就是通过PMS.BinderService实现。</p>
+<p>Binder服务注册的过程在SystemService中的publishBinderService方法，通过ServiceManager.addService注册：</p>
+<pre><code>frameworks/base/services/core/java/com/android/server/SystemService.java
+
+    protected final void publishBinderService(String name, IBinder service,
+            boolean allowIsolated, int dumpPriority) &#123;
+        ServiceManager.addService(name, service, allowIsolated, dumpPriority);
+    &#125;
+
+
+frameworks/base/core/java/android/os/ServiceManager.java
+
+    public static void addService(String name, IBinder service) &#123;
+        addService(name, service, false, IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT);
+    &#125;
+</code></pre>
+<p>当通过ServiceManager注册后，就可以根据Context.POWER_SERVICE在其他服务中获得服务代理对象，进行跨进程交互了。</p>
+<p>LocalService则用于system_server进程内部交互，注册的对象是另一个内部类——继承自PowerManagerInternal的LocalService(带有Internal的类一般都在System进程内使用)。Local Service的注册是在LocalServices中进行，其注册方法如下：</p>
+<pre><code>frameworks/base/services/core/java/com/android/server/SystemService.java
+
+    protected final &lt;T&gt; void publishLocalService(Class&lt;T&gt; type, T service) &#123;
+        LocalServices.addService(type, service);
+    &#125;
+
+
+frameworks/base/core/java/com/android/server/LocalServices.java
+
+    public static &lt;T&gt; void addService(Class&lt;T&gt; type, T service) &#123;
+        synchronized (sLocalServiceObjects) &#123;
+            if (sLocalServiceObjects.containsKey(type)) &#123;
+                throw new IllegalStateException(&quot;Overriding service registration&quot;);
+            &#125;
+            sLocalServiceObjects.put(type, service); //添加到sLocalServiceObjects容器中
+        &#125;
+    &#125;
+</code></pre>
+<h4 id="1-3-onBootPhase-进行各个启动阶段的处理"><a href="#1-3-onBootPhase-进行各个启动阶段的处理" class="headerlink" title="1.3 onBootPhase()进行各个启动阶段的处理"></a>1.3 onBootPhase()进行各个启动阶段的处理</h4><p>回到SytemServer中，startBootstrapServices()方法中PMS的实例化和注册流程执行完成了，接下来会开始执行SystemService的生命周期，会开始执行SystemServiceManager.onBootPhase()，这个方法为所有的已进行实例化和注册的服务(通过前面的startService启动的服务)设置启动阶段，以便在不同的启动阶段进行不同的工作，方法如下：</p>
+<pre><code>frameworks/base/services/core/java/com/android/server/SystemServiceManager.java
+
+    public void startBootPhase(@NonNull TimingsTraceAndSlog t, int phase) &#123;
+        mCurrentPhase = phase;
+        try &#123;
+            final int serviceLen = mServices.size();
+            for (int i = 0; i &lt; serviceLen; i++) &#123;
+                final SystemService service = mServices.get(i);
+                try &#123;
+                    service.onBootPhase(mCurrentPhase);
+                &#125; catch (Exception ex) &#123;
+                    ...
+                &#125;
+            &#125;
+        &#125; finally &#123;
+            t.traceEnd();
+        &#125;
+
+        if (phase == SystemService.PHASE_BOOT_COMPLETED) &#123;
+            final long totalBootTime = SystemClock.uptimeMillis() - mRuntimeStartUptime;
+            t.logDuration(&quot;TotalBootTime&quot;, totalBootTime);
+            SystemServerInitThreadPool.shutdown();
+        &#125;
+    &#125;
+</code></pre>
+<p>在SystemServiceManager#startBootPhase()中，通过在SystemServiceManager中传入不同的形参，遍历SystemServiceManager#mServices列表，调用各个SystemService#onBootPhase(int)方法，根据参数在方法实现中完成不同的工作。在SystemService中定义了七个代表启动阶段的参数：</p>
+<blockquote>
+<p>PHASE_WAIT_FOR_DEFAULT_DISPLAY：第一个启动阶段，用于在启动PKMS之前，需要确保已经存在默认逻辑屏，只有DisplayManagerService使用该阶段；<br>PHASE_LOCK_SETTINGS_READY：第二个启动阶段，该阶段的执行，意味这Lock Pattern&#x2F;Password相关服务已经准备完毕，只有DisplayManagerService使用该阶段；<br>PHASE_SYSTEM_SERVICES_READY：第三个启动阶段，该阶段的执行，意味这其他服务可以安全地使用核心系统服务;<br>PHASE_DEVICE_SPECIFIC_SERVICES_READY：第四个启动阶段，该阶段的执行，意味这其他服务可以安全地使用设备指定的一些系统服务，这些服务在config_deviceSpecificSystemServices中进行配置;<br>PHASE_ACTIVITY_MANAGER_READY：第五个启动阶段，该阶段的执行，意味这其他AMS组件已经启动完成，可以进行广播操作;<br>PHASE_THIRD_PARTY_APPS_CAN_START：第六个启动阶段，该阶段的执行，意味这系统可以启动APP，并可以进行service的bind&#x2F;start操作了；<br>PHASE_BOOT_COMPLETED：第六个启动阶段，该阶段的执行，意味这启动完成，Home应用也已经启动完成，并且可以和设备进行交互了。</p>
+</blockquote>
+<p>PMS#onBootPhase()方法只对以上的3个阶段做了处理：</p>
+<pre><code>frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    @Override
+    public void onBootPhase(int phase) &#123;
+        if (phase == PHASE_SYSTEM_SERVICES_READY) &#123;
+            systemReady();  //如果是PHASE_SYSTEM_SERVICES_READY阶段则调用PMS的systemReady()
+
+        &#125; else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) &#123;
+            //统计系统启动次数，adb shell settings get global boot_count可查看
+            incrementBootCount();
+
+        &#125; else if (phase == PHASE_BOOT_COMPLETED) &#123;
+            synchronized (mLock) &#123;
+                final long now = mClock.uptimeMillis();
+                mBootCompleted = true;  //表示启动完成
+                mDirty |= DIRTY_BOOT_COMPLETED;  //最重要的标志位
+                
+                //执行BatterySaverStateMachine.onBootCompleted()
+                mBatterySaverStateMachine.onBootCompleted();
+                //更新用户活动时间
+                userActivityNoUpdateLocked(
+                        now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
+                //更新全局状态信息
+                updatePowerStateLocked();
+                if (sQuiescent) &#123;
+                    sleepPowerGroupLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP),
+                            mClock.uptimeMillis(),
+                            PowerManager.GO_TO_SLEEP_REASON_QUIESCENT,
+                            Process.SYSTEM_UID);
+                &#125;
+                //注册DeviceStateManager服务的回调接口
+                mContext.getSystemService(DeviceStateManager.class).registerCallback(
+                        new HandlerExecutor(mHandler), new DeviceStateListener());
+            &#125;
+        &#125;
+    &#125;
+</code></pre>
+<p>mDirty是一个二进制的标记位，用来表示电源状态哪一部分发生了改变，通过对其进行置位（|操作）、清零（～操作），得到二进制数各个位的值(0或1)，进行不同的处理，这个变量非常重要。<br>最后，调用updatePowerStateLocked()方法，这是整个PMS中最重要的方法，会在下面进行详细分析。<br>此时，启动过程中SystemService的生命周期方法全部执行完毕。</p>
+<h4 id="1-4-sytemReady"><a href="#1-4-sytemReady" class="headerlink" title="1.4 sytemReady()"></a>1.4 sytemReady()</h4><p>当onBootPhase处于PHASE_SYSTEM_SERVICES_READY阶段时，执行sytemReady()</p>
+<pre><code>    private void systemReady() &#123;
+        //方法太长了
+    &#125;
+</code></pre>
+<p>这个方法中主要做了以下几个操作，方法太长了相关方法代码就不再粘贴:</p>
+<p>获取各类本地服务和远程服务，如Dreamland服务(DreamMangerService)、窗口服务(PhoneWindowManager)、电池状态监听(BatteryService)等服务；<br>注册用于和其他SytemService交互的广播；<br>调用updateSettingsLocked()方法更新Settings中值的变化；<br>调用readConfigurationLocked()方法读取配置文件中的默认值；<br>注册SettingsObserver监听；</p>
+<p>到此为止，PMS的启动过程完成。</p>
+<h3 id="2-核心方法updatePowerStateLocked"><a href="#2-核心方法updatePowerStateLocked" class="headerlink" title="2. 核心方法updatePowerStateLocked()"></a>2. 核心方法updatePowerStateLocked()</h3><p>updatePowerStateLocked()方法是整个PMS模块的核心方法，也是整个PSM中最重要的一个方法，它用来更新整个Power状态。当Power状态发生改变时，如亮灭屏、电池状态改变、暗屏、WakeLock锁申请&#x2F;释放…都会调用该方法，并调用其他同级方法进行各个状态的更新：</p>
+<pre><code>frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    private void updatePowerStateLocked() &#123;
+        if (!mSystemReady || mDirty == 0 || mUpdatePowerStateInProgress) &#123;
+            return;
+        &#125;
+
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, &quot;updatePowerState&quot;);
+        mUpdatePowerStateInProgress = true;
+        try &#123;
+            // Phase 0: Basic state updates. 基本状态的更新
+            updateIsPoweredLocked(mDirty);  //更新充电状态
+            updateStayOnLocked(mDirty);  //更新当前是否为屏幕常亮状态，由mStayOn控制
+            updateScreenBrightnessBoostLocked(mDirty);  //更新是否需要增强亮度变量
+
+            // Phase 1: Update wakefulness. 更新唤醒状态
+            // Loop because the wake lock and user activity computations are influenced
+            // by changes in wakefulness.
+            // 循环是因为唤醒锁和用户活动计算受到唤醒状态变化的影响。
+            final long now = mClock.uptimeMillis();
+            int dirtyPhase2 = 0;
+            for (;;) &#123; // 循环进行更新流程，直到updateWakefulnessLocked()返回false
+                int dirtyPhase1 = mDirty;
+                dirtyPhase2 |= dirtyPhase1;
+                mDirty = 0;  //清空标记
+                // 更新用于统计wakelock的标记值mWakeLockSummary属性
+                updateWakeLockSummaryLocked(dirtyPhase1);
+                // 更新用于统计用户活动状态的标记值mUserActivitySummary属性
+                updateUserActivitySummaryLocked(now, dirtyPhase1);
+                // 更新细微模式状态
+                updateAttentiveStateLocked(now, dirtyPhase1);
+                // 更新唤醒状态，如果状态改变返回true
+                if (!updateWakefulnessLocked(dirtyPhase1)) &#123;
+                    break;
+                &#125;
+            &#125;
+
+            // Phase 2: Lock profiles that became inactive/not kept awake.
+            updateProfilesLocked(now);
+
+            // Phase 3: Update power state of all PowerGroups. 更新PowerGroups状态
+            final boolean powerGroupsBecameReady = updatePowerGroupsLocked(dirtyPhase2);
+
+            // Phase 4: Update dream state (depends on power group ready signal). 更新Dreamland状态
+            updateDreamLocked(dirtyPhase2, powerGroupsBecameReady);
+
+            // Phase 5: Send notifications, if needed. 如果wakefulness改变，做最后的收尾工作
+            finishWakefulnessChangeIfNeededLocked();
+
+            // Phase 6: Update suspend blocker.
+            // Because we might release the last suspend blocker here, we need to make sure
+            // we finished everything else first! 更新SuspendBlocker锁状态
+            updateSuspendBlockerLocked();
+        &#125; finally &#123;
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
+            mUpdatePowerStateInProgress = false;
+        &#125;
+    &#125;
+</code></pre>
+<p>下面对以上内容中所有方法逐个进行分析</p>
+<h4 id="2-1-updateIsPoweredLocked-更新充电状态"><a href="#2-1-updateIsPoweredLocked-更新充电状态" class="headerlink" title="2.1 updateIsPoweredLocked()更新充电状态"></a>2.1 updateIsPoweredLocked()更新充电状态</h4><p>这个方法用于更新mIsPowered属性，它代表当前的充电状态。插拔USB点亮屏幕功能的逻辑，就是在这个方法中。该方法如下：</p>
+<pre><code>    private void updateIsPoweredLocked(int dirty) &#123;
+        if ((dirty &amp; DIRTY_BATTERY_STATE) != 0) &#123;
+            // 记录旧值
+            final boolean wasPowered = mIsPowered;
+            final int oldPlugType = mPlugType;
+            // 获取新值
+            mIsPowered = mBatteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
+            mPlugType = mBatteryManagerInternal.getPlugType();
+            mBatteryLevel = mBatteryManagerInternal.getBatteryLevel();
+            mBatteryLevelLow = mBatteryManagerInternal.getBatteryLevelLow();
+
+            // 当充电状态发生变化
+            if (wasPowered != mIsPowered || oldPlugType != mPlugType) &#123;
+                mDirty |= DIRTY_IS_POWERED; // 设置标记位DIRTY_IS_POWERED
+
+                // 更新无线充电状态
+                final boolean dockedOnWirelessCharger = mWirelessChargerDetector.update(
+                        mIsPowered, mPlugType);
+
+                final long now = mClock.uptimeMillis();
+                // 插拔USB是否需要亮屏
+                if (shouldWakeUpWhenPluggedOrUnpluggedLocked(wasPowered, oldPlugType,
+                        dockedOnWirelessCharger)) &#123;
+                    // 亮屏流程
+                    wakePowerGroupLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP),
+                            now, PowerManager.WAKE_REASON_PLUGGED_IN,
+                            &quot;android.server.power:PLUGGED:&quot; + mIsPowered, Process.SYSTEM_UID,
+                            mContext.getOpPackageName(), Process.SYSTEM_UID);
+                &#125;
+                // 更新用户活动时间
+                userActivityNoUpdateLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP), now,
+                        PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
+
+                // 播放充电提示音和动画
+                if (mBootCompleted) &#123;  //只有在开机完成后才允许播放充电提示声
+                    if (mIsPowered &amp;&amp; !BatteryManager.isPlugWired(oldPlugType)
+                            &amp;&amp; BatteryManager.isPlugWired(mPlugType)) &#123;
+                        mNotifier.onWiredChargingStarted(mUserId);
+                    &#125; else if (dockedOnWirelessCharger) &#123;
+                        mNotifier.onWirelessChargingStarted(mBatteryLevel, mUserId);
+                    &#125;
+                &#125;
+            &#125;
+            //将充电状态更新到BatterySaverStateMachine
+            mBatterySaverStateMachine.setBatteryStatus(mIsPowered, mBatteryLevel, mBatteryLevelLow);
+        &#125;
+    &#125;
+</code></pre>
+<p>只有对mDirty设置了DIRTY_BATTERY_STATE标记时才会进入这个方法中，那么DIRTY_BATTERY_STATE在什么时候会设置呢？一是当PMS执行systemReady()时，二是当电池信息变化后，由healthd模块上报给BatteryService，BatteryService中则会发出广播Intent.ACTION_BATTERY_CHANGED来通知其他组件，PMS中会接收这个广播并作出处理：</p>
+<pre><code>frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    final class BatteryReceiver extends BroadcastReceiver &#123;
+        @Override
+        public void onReceive(Context context, Intent intent) &#123;
+            synchronized (mLock) &#123;
+                handleBatteryStateChangedLocked();
+            &#125;
+        &#125;
+    &#125;
+
+    private void handleBatteryStateChangedLocked() &#123;
+        mDirty |= DIRTY_BATTERY_STATE;
+        updatePowerStateLocked();
+    &#125;
+</code></pre>
+<p>因此，只要电池状态发生变化，就会执行这个方法。在这个方法中：</p>
+<ol>
+<li>首先，更新一些如mIsPowered等全局变量。</li>
+<li>然后，通过shouldWakeUpWhenPluggedOrUnpluggedLocked()方法判断是否需要亮屏，这就是插拔USB点亮屏幕功能的逻辑。</li>
+<li>接下来，执行userActivityNoUpdateLocked()方法更新用户活动时间，这个时间决定了何时会自动灭屏，用户每次操作手机(触摸、按键、Other)都会更新到当前时间，用户最后活动时间 + 设置自动休眠时间 &#x3D; 最终自动灭屏的时间点，这个方法会在后面部分分析。</li>
+<li>再接下来，则调用Notifier对象播放插拔USB音效或动画，Notifier类是PMS模块中用于发送广播、异步通知其他组件的一个类。</li>
+<li>最后，将充电状态传递给mBatterySaverStateMachine中，进行省电策略的调整。</li>
+</ol>
+<h4 id="2-2-updateStayOnLocked-更新屏幕常亮状态"><a href="#2-2-updateStayOnLocked-更新屏幕常亮状态" class="headerlink" title="2.2 updateStayOnLocked()更新屏幕常亮状态"></a>2.2 updateStayOnLocked()更新屏幕常亮状态</h4><p>这个方法用来更新全局变量mStayOn的值，如果把”开发者选项—不锁定屏幕”这个选项开启后，则在充电时将保持常亮不会自动休眠：</p>
+<pre><code>frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    private void updateStayOnLocked(int dirty) &#123;
+        if ((dirty &amp; (DIRTY_BATTERY_STATE | DIRTY_SETTINGS)) != 0) &#123;
+            final boolean wasStayOn = mStayOn;
+            if (mStayOnWhilePluggedInSetting != 0
+                    &amp;&amp; !isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) &#123;
+                // 如果任意方式充电(AC/USB/wireless)，返回true
+                mStayOn = mBatteryManagerInternal.isPowered(mStayOnWhilePluggedInSetting);
+            &#125; else &#123;
+                mStayOn = false;
+            &#125;
+            // 状态发生变化时，向mDirty设置DIRTY_STAY_ON标记
+            if (mStayOn != wasStayOn) &#123;
+                mDirty |= DIRTY_STAY_ON;
+            &#125;
+        &#125;
+    &#125;
+</code></pre>
+<p>只有mDirty设置了DIRTY_BATTERY_STATE或DIRTY_SETTINGS标记位后，才会执行该方法。DIRTY_BATTERY_STATE在电池状态发生变化后设置，DIRTY_SETTINGS是在Settings中的值发生变化后设置，mStayOnWhilePluggedInSetting就是从来自于Settings中”不锁定屏幕”的值，如果发生变化，且处于充电状态，则会更新mStayOn变量的值。在自动灭屏流程中，一旦mStayOn值为true，则永远不会灭屏，从而实现了“不锁定屏幕”这个功能。</p>
+<h4 id="2-3-updateScreenBrightnessBoostLocked-更新是否增强亮度"><a href="#2-3-updateScreenBrightnessBoostLocked-更新是否增强亮度" class="headerlink" title="2.3 updateScreenBrightnessBoostLocked()更新是否增强亮度"></a>2.3 updateScreenBrightnessBoostLocked()更新是否增强亮度</h4><p>这个方法会更新表示增强亮度的全局变量mScreenBrightnessBoostInProgress，PMS.BinderService提供了boostScreenBrightness()方法，允许其他组件通过该接口将亮度调节到最大(短时间保持)，并保持5s后恢复：</p>
+<pre><code>    private void updateScreenBrightnessBoostLocked(int dirty) &#123;
+        if ((dirty &amp; DIRTY_SCREEN_BRIGHTNESS_BOOST) != 0) &#123;
+            if (mScreenBrightnessBoostInProgress) &#123;
+                final long now = mClock.uptimeMillis();
+                mHandler.removeMessages(MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT);
+                if (mLastScreenBrightnessBoostTime &gt; mLastGlobalSleepTime) &#123;
+                    final long boostTimeout = mLastScreenBrightnessBoostTime +
+                            SCREEN_BRIGHTNESS_BOOST_TIMEOUT;
+                    // 向主线程mHandler发出一个异步消息，5s后会再次更新
+                    if (boostTimeout &gt; now) &#123;
+                        Message msg = mHandler.obtainMessage(MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT);
+                        msg.setAsynchronous(true);
+                        mHandler.sendMessageAtTime(msg, boostTimeout);
+                        return;
+                    &#125;
+                &#125;
+                // 表示增强亮度结束
+                mScreenBrightnessBoostInProgress = false;
+                // 更新用户活动时间
+                userActivityNoUpdateLocked(now,
+                        PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
+            &#125;
+        &#125;
+    &#125;
+</code></pre>
+<p>只有当mDirty设置了DIRTY_SCREEN_BRIGHTNESS_BOOST标记时，才会执行这个方法。这个标记位就是通过boostScreenBrightness()设置，这个功能在Google原生逻辑中有一个使用场景：</p>
+<pre><code>// frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
+
+//是否开启双击Power键定制行为(例如双击打开NFC,相机等)
+mDoublePressOnPowerBehavior = mContext.getResources().getInteger(
+        com.android.internal.R.integer.config_doublePressOnPowerBehavior);
+
+    // must match: config_doublePressOnPowerBehavior in config.xml
+    static final int MULTI_PRESS_POWER_NOTHING = 0;  //默认无
+    static final int MULTI_PRESS_POWER_THEATER_MODE = 1;  //剧场模式
+    static final int MULTI_PRESS_POWER_BRIGHTNESS_BOOST = 2;  //双击电源键会将亮度调到最大
+    static final int MULTI_PRESS_POWER_LAUNCH_TARGET_ACTIVITY = 3;  //双击打开特定应用
+</code></pre>
+<h4 id="2-4-updateWakeLockSummaryLocked-更新WakeLock统计值"><a href="#2-4-updateWakeLockSummaryLocked-更新WakeLock统计值" class="headerlink" title="2.4 updateWakeLockSummaryLocked()更新WakeLock统计值"></a>2.4 updateWakeLockSummaryLocked()更新WakeLock统计值</h4><p>从这个方法开始到，直到updateWakefulnessLocked()结束，将会在一个for循环中执行。<br>该方法用来更新mWakeLockSummary属性，它是用来记录所有WakeLock锁状态的状态值，代表了所有的WakeLock，在请求Display状时作为判断条件确定具体的请求状态。系统规定了系统休眠状态对WakeLock锁的使用影响，如当系统休眠后，常亮锁(PowerManager.SCREEN_BRIGHT等)将会被忽略；系统唤醒后，Doze锁(PowerManager.DOZE_WAKE_LOCK等）将会被忽略：</p>
+<pre><code>    private void updateWakeLockSummaryLocked(int dirty) &#123;
+        if ((dirty &amp; (DIRTY_WAKE_LOCKS | DIRTY_WAKEFULNESS | DIRTY_DISPLAY_GROUP_WAKEFULNESS))
+                != 0) &#123;
+
+            mWakeLockSummary = 0;  //初始值为0
+            // 将每个ProfilePowerState的mWakeLockSummary也进行重置
+            final int numProfiles = mProfilePowerState.size();
+            for (int i = 0; i &lt; numProfiles; i++) &#123;
+                mProfilePowerState.valueAt(i).mWakeLockSummary = 0;
+            &#125;
+            // 将每个mPowerGroups的setWakeLockSummaryLocked也进行重置
+            for (int idx = 0; idx &lt; mPowerGroups.size(); idx++) &#123;
+                mPowerGroups.valueAt(idx).setWakeLockSummaryLocked(0);
+            &#125;
+
+            int invalidGroupWakeLockSummary = 0;
+            final int numWakeLocks = mWakeLocks.size();
+            // 遍历mWakeLocks列表
+            for (int i = 0; i &lt; numWakeLocks; i++) &#123;
+                final WakeLock wakeLock = mWakeLocks.get(i);
+                final Integer groupId = wakeLock.getPowerGroupId();
+                // a wakelock with an invalid group ID should affect all groups
+                if (groupId == null || (groupId != Display.INVALID_DISPLAY_GROUP
+                        &amp;&amp; !mPowerGroups.contains(groupId))) &#123;
+                    continue;
+                &#125;
+
+                final PowerGroup powerGroup = mPowerGroups.get(groupId);
+                // 获取每个WakeLock对应的Flag标记
+                final int wakeLockFlags = getWakeLockSummaryFlags(wakeLock);
+                 // 标记在mWakeLockSummary上
+                mWakeLockSummary |= wakeLockFlags;
+
+                if (groupId != Display.INVALID_DISPLAY_GROUP) &#123;
+                    int wakeLockSummary = powerGroup.getWakeLockSummaryLocked();
+                    wakeLockSummary |= wakeLockFlags;
+                    powerGroup.setWakeLockSummaryLocked(wakeLockSummary);
+                &#125; else &#123;
+                    invalidGroupWakeLockSummary |= wakeLockFlags;
+                &#125;
+                // 对每个ProfilePowerState#mWakeLockSummary也进行标记
+                for (int j = 0; j &lt; numProfiles; j++) &#123;
+                    final ProfilePowerState profile = mProfilePowerState.valueAt(j);
+                    if (wakeLockAffectsUser(wakeLock, profile.mUserId)) &#123;
+                        profile.mWakeLockSummary |= wakeLockFlags;
+                    &#125;
+                &#125;
+            &#125;
+
+            for (int idx = 0; idx &lt; mPowerGroups.size(); idx++) &#123;
+                final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
+                final int wakeLockSummary = adjustWakeLockSummary(powerGroup.getWakefulnessLocked(),
+                        invalidGroupWakeLockSummary | powerGroup.getWakeLockSummaryLocked());
+                powerGroup.setWakeLockSummaryLocked(wakeLockSummary);
+            &#125;
+            // 根据系统状态对mWakeLockSummary进行调整
+            mWakeLockSummary = adjustWakeLockSummary(getGlobalWakefulnessLocked(),
+                    mWakeLockSummary);
+            // 对每个ProfilePowerState#mWakeLockSummary也进行调整
+            for (int i = 0; i &lt; numProfiles; i++) &#123;
+                final ProfilePowerState profile = mProfilePowerState.valueAt(i);
+                profile.mWakeLockSummary = adjustWakeLockSummary(getGlobalWakefulnessLocked(),
+                        profile.mWakeLockSummary);
+            &#125;
+        &#125;
+    &#125;
+</code></pre>
+<p>只有当mDirty设置了DIRTY_WAKE_LOCKS和DIRTY_WAKEFULNESS标记位时，才会执行该方法。DIRTY_WAKE_LOCKS在申请WakeLock锁时设置，DIRTY_WAKEFULNESS在系统唤醒状态发生变化时设置。<br>进入该方法后，首先从保存了WakeLock的List中进行遍历，并根据WakeLock类型给mWakeLockSummary设置标记，这些标记位如下:</p>
+<pre><code>// frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    // Summarizes the state of all active wakelocks.
+    static final int WAKE_LOCK_CPU = 1 &lt;&lt; 0;  // 表示需要CPU保持唤醒状态
+    static final int WAKE_LOCK_SCREEN_BRIGHT = 1 &lt;&lt; 1;  // 表示持有FULL_WAKE_LOCK锁，需要屏幕常亮
+    static final int WAKE_LOCK_SCREEN_DIM = 1 &lt;&lt; 2;  // 表示持有SCREEN_DIM_WAKE_LOCK锁，需要保持dim不灭屏
+    static final int WAKE_LOCK_BUTTON_BRIGHT = 1 &lt;&lt; 3;  //表示持有FULL_WAKE_LOCK锁，需要按键灯常亮
+    static final int WAKE_LOCK_PROXIMITY_SCREEN_OFF = 1 &lt;&lt; 4;  // 表示持有Psensor WakeLock锁
+    static final int WAKE_LOCK_STAY_AWAKE = 1 &lt;&lt; 5; // only set if already awake  // 表示保持屏幕常亮(只能用在awake状态时)
+    static final int WAKE_LOCK_DOZE = 1 &lt;&lt; 6;   // 表示持有DOZE_WAKE_LOCK锁
+    static final int WAKE_LOCK_DRAW = 1 &lt;&lt; 7;   //表示持有DRAW_WAKE_LOCK锁
+</code></pre>
+<p>然后将根据系统状态进行调整:</p>
+<pre><code>// frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    private static int adjustWakeLockSummary(int wakefulness, int wakeLockSummary) &#123;
+        // Cancel wake locks that make no sense based on the current state.
+         // 唤醒状态不处于Doze状态时，忽略掉PowerManager.DOZE_WAKE_LOCK和PowerManager.DRAW_WAKE_LOCK两类型锁
+        if (wakefulness != WAKEFULNESS_DOZING) &#123;
+            wakeLockSummary &amp;= ~(WAKE_LOCK_DOZE | WAKE_LOCK_DRAW);
+        &#125;
+        // 唤醒状态处于Asleep状态或者Doze状态时，忽略掉屏幕常亮锁、PSensor锁
+        if (wakefulness == WAKEFULNESS_ASLEEP
+                || (wakeLockSummary &amp; WAKE_LOCK_DOZE) != 0) &#123;
+            wakeLockSummary &amp;= ~(WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM
+                    | WAKE_LOCK_BUTTON_BRIGHT);
+            if (wakefulness == WAKEFULNESS_ASLEEP) &#123;
+                wakeLockSummary &amp;= ~WAKE_LOCK_PROXIMITY_SCREEN_OFF;
+            &#125;
+        &#125;
+
+        // Infer implied wake locks where necessary based on the current state.
+        if ((wakeLockSummary &amp; (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM)) != 0) &#123;
+            // 唤醒状态处于Awake状态，WAKE_LOCK_STAY_AWAKE只用于awake状态时
+            if (wakefulness == WAKEFULNESS_AWAKE) &#123;
+                wakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_STAY_AWAKE;
+            &#125; else if (wakefulness == WAKEFULNESS_DREAMING) &#123;  // 唤醒状态处于Awake状态，WAKE_LOCK_STAY_AWAKE只用于awake状态时
+                wakeLockSummary |= WAKE_LOCK_CPU;
+            &#125;
+        &#125;
+        // 有DRAW_WAKE_LOCK锁时，需要CPU保持唤醒
+        if ((wakeLockSummary &amp; WAKE_LOCK_DRAW) != 0) &#123;
+            wakeLockSummary |= WAKE_LOCK_CPU;
+        &#125;
+
+        return wakeLockSummary;
+    &#125;
+</code></pre>
+<blockquote>
+<p>在平时分析处理不灭屏相关Bug时，通过该值可确定当前系统持有哪些类型的锁。</p>
+</blockquote>
+<p>最终得到mWakeLockSummary，在自动灭屏流程中将使用起到重要作用，当自动灭屏时，如果mWakeLockSummary设置有WAKE_LOCK_STAY_AWAKE标记位，那么将不会灭屏。<br>此外，上面方法中出现了对ProfilePowerState对象的处理，它用来对不同user进行不同参数的设置，在多用户模式下，可以支持不同的状态，这部分略去。</p>
+<h4 id="2-5-updateUserActivitySummaryLocked-更新用户活动状态"><a href="#2-5-updateUserActivitySummaryLocked-更新用户活动状态" class="headerlink" title="2.5 updateUserActivitySummaryLocked()更新用户活动状态"></a>2.5 updateUserActivitySummaryLocked()更新用户活动状态</h4><p>这个方法用来更新全局变量mUserActivitySummary，它表示用户活动状态，有三个值:</p>
+<pre><code>    // Summarizes the user activity state.
+    static final int USER_ACTIVITY_SCREEN_BRIGHT = 1 &lt;&lt; 0;  // 表示亮屏状态下的交互
+    static final int USER_ACTIVITY_SCREEN_DIM = 1 &lt;&lt; 1;  // 表示Dim状态下的交互
+    static final int USER_ACTIVITY_SCREEN_DREAM = 1 &lt;&lt; 2;  // 表示Dreamland状态下的交互
+</code></pre>
+<p>何时开始自动灭屏，就是这个方法中实现的。当设备和用户有交互时，都会根据当前时间和自动灭屏时间、Dim时长、当前唤醒状态计算下次休眠的时间，完成自动灭屏的操作。由亮屏进入Dim的时长、Dim到灭屏的时长、亮屏到屏保的时长，都是在这里计算的，这个方法的详细分析见后面的灭屏流程篇。</p>
+<h4 id="2-6-updateAttentiveStateLocked-更新细微模式状态"><a href="#2-6-updateAttentiveStateLocked-更新细微模式状态" class="headerlink" title="2.6 updateAttentiveStateLocked()更新细微模式状态"></a>2.6 updateAttentiveStateLocked()更新细微模式状态</h4><p>这个方法用来更新细微模式状态，这是Android R上新添加的一个功能，其目的就是解决用户长时间没有操作但一直持有亮屏锁导致系统不灭屏这个场景的，算是一个省电优化项，看下是如何实现的：</p>
+<pre><code>//frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    private void updateAttentiveStateLocked(long now, int dirty) &#123;
+        // 触发细微模式的时间阈值
+        long attentiveTimeout = getAttentiveTimeoutLocked();
+        // Attentive state only applies to the default display group.
+        // 自动休眠时间
+        long goToSleepTime = mPowerGroups.get(
+                Display.DEFAULT_DISPLAY_GROUP).getLastUserActivityTimeLocked() + attentiveTimeout;
+         // 细微模式提示Dialog弹出时间
+        long showWarningTime = goToSleepTime - mAttentiveWarningDurationConfig;
+        // 是否已经弹出提升对话框
+        boolean warningDismissed = maybeHideInattentiveSleepWarningLocked(now, showWarningTime);
+
+        if (attentiveTimeout &gt;= 0 &amp;&amp; (warningDismissed
+                || (dirty &amp; (DIRTY_ATTENTIVE | DIRTY_STAY_ON | DIRTY_SCREEN_BRIGHTNESS_BOOST
+                | DIRTY_PROXIMITY_POSITIVE | DIRTY_WAKEFULNESS | DIRTY_BOOT_COMPLETED
+                | DIRTY_SETTINGS)) != 0)) &#123;
+
+            mHandler.removeMessages(MSG_ATTENTIVE_TIMEOUT);
+            // 是否需要弹出警告
+            if (isBeingKeptFromInattentiveSleepLocked()) &#123;
+                return;
+            &#125;
+
+            long nextTimeout = -1;
+
+            if (now &lt; showWarningTime) &#123;
+                nextTimeout = showWarningTime;
+            &#125; else if (now &lt; goToSleepTime) &#123;
+                // 弹出警告给用户
+                mInattentiveSleepWarningOverlayController.show();
+                nextTimeout = goToSleepTime;
+            &#125;
+             // 下一次进入时将会灭屏
+            if (nextTimeout &gt;= 0) &#123;
+                scheduleAttentiveTimeout(nextTimeout);
+            &#125;
+        &#125;
+    &#125;
+</code></pre>
+<p>这里提供了两个配置值：</p>
+<ul>
+<li>mAttentiveWarningDurationConfig表示触发细微模式前，弹出警告的时长，到达该时间时，会弹出对话框提示用户是否还要亮屏；</li>
+<li>mAttentiveTimeoutConfig表示触发细微模式的时间阈值，到达该时长后，会进行自动灭屏；<br>这种情况下，即使没有达到用户设置的自动休眠时间，也会进行自动灭屏。</li>
+</ul>
+<h4 id="2-7-updateWakefulnessLocked-是否需要更新唤醒状态"><a href="#2-7-updateWakefulnessLocked-是否需要更新唤醒状态" class="headerlink" title="2.7 updateWakefulnessLocked()是否需要更新唤醒状态"></a>2.7 updateWakefulnessLocked()是否需要更新唤醒状态</h4><p>这个方法也和自动灭屏流程有关。如果满足自动灭屏条件，会更新系统唤醒状态。<br>这三个方法放在for(;;)循环中执行，是因为它们共同决定了设备的唤醒状态，前两个方法是汇总状态，后一个方法是根据前两个方法汇总的值而进行判断是否要改变当前的设备唤醒状态，汇总状态会受mWakefulness的影响，因此会进行循环处理。<br>同时，也仅仅会在超时灭屏进入睡眠或屏保时，for循环会执行两次，其他情况下，只会执行一次。这个方法的详细分析见PMS灭屏流程。</p>
+<h4 id="2-8-updateProfilesLocked"><a href="#2-8-updateProfilesLocked" class="headerlink" title="2.8 updateProfilesLocked()"></a>2.8 updateProfilesLocked()</h4><p>以上几个方法针对全局状态进行更新，这个方法则根据ProfilePowerState中保存的状态，更新不同用户是否进入锁定状态，由于使用场景不是很高，这里暂且略过。</p>
+<h4 id="2-9-updatePowerGroupsLocked"><a href="#2-9-updatePowerGroupsLocked" class="headerlink" title="2.9 updatePowerGroupsLocked"></a>2.9 updatePowerGroupsLocked</h4><p>该方法用于请求并更新Display状态，在这个方法中，会确定多个影响Display状态的属性，并将这些值封装到DisplayPowerRequest对象中，向DisplayMangerService发起请求，最终由DMS完成Display亮度、状态的更新：</p>
+<pre><code>    private boolean updatePowerGroupsLocked(int dirty) &#123;
+        final boolean oldPowerGroupsReady = areAllPowerGroupsReadyLocked();
+        if ((dirty &amp; (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS
+                | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
+                | DIRTY_SETTINGS | DIRTY_SCREEN_BRIGHTNESS_BOOST | DIRTY_VR_MODE_CHANGED |
+                DIRTY_QUIESCENT | DIRTY_DISPLAY_GROUP_WAKEFULNESS)) != 0) &#123;
+            if ((dirty &amp; DIRTY_QUIESCENT) != 0) &#123;
+                if (areAllPowerGroupsReadyLocked()) &#123;
+                    sQuiescent = false;
+                &#125; else &#123;
+                    mDirty |= DIRTY_QUIESCENT;
+                &#125;
+            &#125;
+
+            for (int idx = 0; idx &lt; mPowerGroups.size(); idx++) &#123;
+                final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
+                final int groupId = powerGroup.getGroupId();
+
+                // Determine appropriate screen brightness and auto-brightness adjustments.
+                final boolean autoBrightness;  // 自动亮度是否开启
+                final float screenBrightnessOverride;  // 是否有覆盖亮度
+                if (!mBootCompleted) &#123;
+                    //启动过程中要求亮度稳定，要求默认亮度和Bootloader中设定的亮度值保持一致
+                    autoBrightness = false;  //不开启自动亮度
+                    screenBrightnessOverride = mScreenBrightnessDefault;  //使用默认值
+                &#125; else if (isValidBrightness(mScreenBrightnessOverrideFromWindowManager)) &#123;
+                    //使用WindowManager覆盖的亮度值
+                    autoBrightness = false;
+                    screenBrightnessOverride = mScreenBrightnessOverrideFromWindowManager;
+                &#125; else &#123;
+                    autoBrightness = (mScreenBrightnessModeSetting
+                            == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+                    screenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+                &#125;
+                //向DisplayMangerService发起请
+                boolean ready = powerGroup.updateLocked(screenBrightnessOverride, autoBrightness,
+                        shouldUseProximitySensorLocked(), shouldBoostScreenBrightness(),
+                        mDozeScreenStateOverrideFromDreamManager,
+                        mDozeScreenBrightnessOverrideFromDreamManagerFloat,
+                        mDrawWakeLockOverrideFromSidekick,
+                        mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS),
+                        sQuiescent, mDozeAfterScreenOff, mIsVrModeEnabled, mBootCompleted,
+                        mScreenBrightnessBoostInProgress, mRequestWaitForNegativeProximity);
+                int wakefulness = powerGroup.getWakefulnessLocked();
+
+                final boolean displayReadyStateChanged = powerGroup.setReadyLocked(ready);
+                final boolean poweringOn = powerGroup.isPoweringOnLocked();
+                if (ready &amp;&amp; displayReadyStateChanged &amp;&amp; poweringOn
+                        &amp;&amp; wakefulness == WAKEFULNESS_AWAKE) &#123;
+                    powerGroup.setIsPoweringOnLocked(false);
+                    LatencyTracker.getInstance(mContext).onActionEnd(ACTION_TURN_ON_SCREEN);
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, groupId);
+                    final int latencyMs = (int) (mClock.uptimeMillis()
+                            - powerGroup.getLastPowerOnTimeLocked());
+                    // 如果亮屏流程超过200ms，输出亮屏所用时间
+                    if (latencyMs &gt;= SCREEN_ON_LATENCY_WARNING_MS) &#123;
+                        Slog.w(TAG, &quot;Screen on took &quot; + latencyMs + &quot; ms&quot;);
+                    &#125;
+                &#125;
+            &#125;
+            // 释放PSensor WakeLock锁时的一个标记
+            mRequestWaitForNegativeProximity = false;
+        &#125;
+
+        return areAllPowerGroupsReadyLocked() &amp;&amp; !oldPowerGroupsReady;
+    &#125;
+
+
+    boolean updateLocked(float screenBrightnessOverride, boolean autoBrightness,
+            boolean useProximitySensor, boolean boostScreenBrightness, int dozeScreenState,
+            float dozeScreenBrightness, boolean overrideDrawWakeLock,
+            PowerSaveState powerSaverState, boolean quiescent, boolean dozeAfterScreenOff,
+            boolean vrModeEnabled, boolean bootCompleted, boolean screenBrightnessBoostInProgress,
+            boolean waitForNegativeProximity) &#123;
+        // 根据系统唤醒状态获取请求的&#39;策略&#39;： off, doze, dim or bright.
+        mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked(quiescent, dozeAfterScreenOff,
+                vrModeEnabled, bootCompleted, screenBrightnessBoostInProgress);
+        // WindowManager覆盖的亮度值，如播放视频时调节亮度
+        mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
+        // 是否使用自动亮度
+        mDisplayPowerRequest.useAutoBrightness = autoBrightness;
+        // 是否存在PSensor Wakelock锁
+        mDisplayPowerRequest.useProximitySensor = useProximitySensor;
+        // 是否有增强亮度
+        mDisplayPowerRequest.boostScreenBrightness = boostScreenBrightness;
+        // 唤醒状态为Doze时，确定display的状态
+        if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) &#123;
+            mDisplayPowerRequest.dozeScreenState = dozeScreenState;
+            if ((getWakeLockSummaryLocked() &amp; WAKE_LOCK_DRAW) != 0 &amp;&amp; !overrideDrawWakeLock) &#123;
+                if (mDisplayPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND) &#123;
+                    mDisplayPowerRequest.dozeScreenState = Display.STATE_DOZE;
+                &#125;
+                if (mDisplayPowerRequest.dozeScreenState == Display.STATE_ON_SUSPEND) &#123;
+                    mDisplayPowerRequest.dozeScreenState = Display.STATE_ON;
+                &#125;
+            &#125;
+            // Doze时的屏幕亮度
+            mDisplayPowerRequest.dozeScreenBrightness = dozeScreenBrightness;
+        &#125; else &#123;
+            mDisplayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
+            mDisplayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        &#125;
+        mDisplayPowerRequest.lowPowerMode = powerSaverState.batterySaverEnabled;
+        mDisplayPowerRequest.screenLowPowerBrightnessFactor = powerSaverState.brightnessFactor;
+        // 发起请求，返回值表示DisplayPowerController中是否完成这次请求
+        boolean ready = mDisplayManagerInternal.requestPowerState(mGroupId, mDisplayPowerRequest,
+                waitForNegativeProximity);
+        mNotifier.onScreenPolicyUpdate(mGroupId, mDisplayPowerRequest.policy);
+        return ready;
+    &#125;
+</code></pre>
+<p>在向DisplayManagerService发起请求时，会将所有的信息封装到DisplayPowerRequest对象中，其中，policy属性值有五类：</p>
+<ul>
+<li>POLICY_OFF：请求屏幕进入灭屏状态；</li>
+<li>POLICY_DOZE：请求屏幕进入Doze状态；</li>
+<li>POLICY_DIM：请求屏幕进入Dim状态，</li>
+<li>POLICY_BRIGHT：请求屏幕处于正常亮屏状态；</li>
+<li>POLICY_VR：VR模式相关；</li>
+</ul>
+<p>在请求前，通过getDesiredScreenPolicyLocked()方法，根据当前唤醒状态和WakeLock统计状态来决定要请求的Display状态：</p>
+<pre><code>    int getDesiredScreenPolicyLocked(boolean quiescent, boolean dozeAfterScreenOff,
+            boolean vrModeEnabled, boolean bootCompleted, boolean screenBrightnessBoostInProgress) &#123;
+        final int wakefulness = getWakefulnessLocked();
+        final int wakeLockSummary = getWakeLockSummaryLocked();
+        // 当前唤醒状态为Asleep，则Display状态会设置为OFF
+        if (wakefulness == WAKEFULNESS_ASLEEP || quiescent) &#123;
+            return DisplayPowerRequest.POLICY_OFF;
+        &#125; else if (wakefulness == WAKEFULNESS_DOZING) &#123;  // 当前唤醒状态为Doze，则Display状态会设置为Doze指定的状态
+            if ((wakeLockSummary &amp; WAKE_LOCK_DOZE) != 0) &#123;
+                return DisplayPowerRequest.POLICY_DOZE;
+            &#125;
+            // 表示跳过Doze的状态，直接设置成OFF
+            if (dozeAfterScreenOff) &#123;
+                return DisplayPowerRequest.POLICY_OFF;
+            &#125;
+            // Fall through and preserve the current screen policy if not configured to
+            // doze after screen off.  This causes the screen off transition to be skipped.
+        &#125;
+
+        //如果开启了VR模式则设置为VR模式
+        if (vrModeEnabled) &#123;
+            return DisplayPowerRequest.POLICY_VR;
+        &#125;
+        // 如果存在亮屏锁、用户活动状态为亮屏、进行增强亮度，则Display状态将设置为ON
+        if ((wakeLockSummary &amp; WAKE_LOCK_SCREEN_BRIGHT) != 0
+                || !bootCompleted
+                || (getUserActivitySummaryLocked() &amp; USER_ACTIVITY_SCREEN_BRIGHT) != 0
+                || screenBrightnessBoostInProgress) &#123;
+            return DisplayPowerRequest.POLICY_BRIGHT;
+        &#125;
+        // 不满足以上条件，默认设置DIM
+        return DisplayPowerRequest.POLICY_DIM;
+    &#125;
+</code></pre>
+<h4 id="2-10-updateDreamLocked"><a href="#2-10-updateDreamLocked" class="headerlink" title="2.10 updateDreamLocked()"></a>2.10 updateDreamLocked()</h4><p>该方法用来更新设备Dreamland状态，比如是否进入Dream、Doze或者开始休眠:</p>
+<pre><code>// frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    private void updateDreamLocked(int dirty, boolean powerGroupBecameReady) &#123;
+        if ((dirty &amp; (DIRTY_WAKEFULNESS
+                | DIRTY_USER_ACTIVITY
+                | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED
+                | DIRTY_ATTENTIVE
+                | DIRTY_WAKE_LOCKS
+                | DIRTY_BOOT_COMPLETED
+                | DIRTY_SETTINGS
+                | DIRTY_IS_POWERED
+                | DIRTY_STAY_ON
+                | DIRTY_PROXIMITY_POSITIVE
+                | DIRTY_BATTERY_STATE)) != 0 || powerGroupBecameReady) &#123;
+            if (areAllPowerGroupsReadyLocked()) &#123; //areAllPowerGroupsReadyLocked为ture后，才会进一步执行
+                //通过Handler异步发送一个消息
+                scheduleSandmanLocked();
+            &#125;
+        &#125;
+    &#125;
+
+    private boolean areAllPowerGroupsReadyLocked() &#123;
+        final int size = mPowerGroups.size();
+        for (int i = 0; i &lt; size; i++) &#123;
+            if (!mPowerGroups.valueAt(i).isReadyLocked()) &#123;
+                return false;
+            &#125;
+        &#125;
+
+        return true;
+    &#125;
+</code></pre>
+<p>可以看到，对于Dreamland相关状态的更新，依赖areAllPowerGroupsReadyLocked的返回值，它表示每一个display是否已经准备就绪，因此只有在准备就绪的情况下才会进一步调用该方法的方法体。最后会PMS主线程中，调用handleSandman()方法执行Dreamland的操作:</p>
+<pre><code>// frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    private void handleSandman(int groupId) &#123; // runs on handler thread
+        // Handle preconditions.
+        final boolean startDreaming;
+        final int wakefulness;
+        synchronized (mLock) &#123;
+            mSandmanScheduled = false;
+
+            final PowerGroup powerGroup = mPowerGroups.get(groupId);
+            wakefulness = powerGroup.getWakefulnessLocked();
+            // 如果召唤了&quot;睡魔&quot;，且每个Display状态已经准备完毕
+            if ((wakefulness == WAKEFULNESS_DREAMING || wakefulness == WAKEFULNESS_DOZING) &amp;&amp;
+                    powerGroup.isSandmanSummonedLocked() &amp;&amp; powerGroup.isReadyLocked()) &#123;
+                // 判断是否可以进入Dreamland
+                startDreaming = canDreamLocked(powerGroup) || canDozeLocked(powerGroup);
+                powerGroup.setSandmanSummonedLocked(/* isSandmanSummoned= */ false);
+            &#125; else &#123;
+                startDreaming = false;
+            &#125;
+        &#125;
+
+        // Start dreaming if needed.
+        // We only control the dream on the handler thread, so we don&#39;t need to worry about
+        // concurrent attempts to start or stop the dream.
+        final boolean isDreaming;
+        if (mDreamManager != null) &#123;
+            // Restart the dream whenever the sandman is summoned.
+            if (startDreaming) &#123;
+                mDreamManager.stopDream(/* immediate= */ false);
+                // 开始进入Dreamland
+                mDreamManager.startDream(wakefulness == WAKEFULNESS_DOZING);
+            &#125;
+            isDreaming = mDreamManager.isDreaming();
+        &#125; else &#123;
+            isDreaming = false;
+        &#125;
+
+        // At this point, we either attempted to start the dream or no attempt will be made,
+        // so stop holding the display suspend blocker for Doze.
+        mDozeStartInProgress = false;
+
+        // Update dream state.
+        synchronized (mLock) &#123;
+            ...
+
+            // Remember the initial battery level when the dream started.
+            // 记录下进入Dream模式前的初始电量值
+            if (startDreaming &amp;&amp; isDreaming) &#123;
+                mBatteryLevelWhenDreamStarted = mBatteryLevel;
+                if (wakefulness == WAKEFULNESS_DOZING) &#123;
+                    Slog.i(TAG, &quot;Dozing...&quot;);
+                &#125; else &#123;
+                    Slog.i(TAG, &quot;Dreaming...&quot;);
+                &#125;
+            &#125;
+
+            // If preconditions changed, wait for the next iteration to determine
+            // whether the dream should continue (or be restarted).
+            final PowerGroup powerGroup = mPowerGroups.get(groupId);
+            if (powerGroup.isSandmanSummonedLocked()
+                    || powerGroup.getWakefulnessLocked() != wakefulness) &#123;
+                return; // wait for next cycle
+            &#125;
+
+            // Determine whether the dream should continue.
+            long now = mClock.uptimeMillis();
+            if (wakefulness == WAKEFULNESS_DREAMING) &#123;
+                if (isDreaming &amp;&amp; canDreamLocked(powerGroup)) &#123;
+                    if (mDreamsBatteryLevelDrainCutoffConfig &gt;= 0
+                            &amp;&amp; mBatteryLevel &lt; mBatteryLevelWhenDreamStarted
+                                    - mDreamsBatteryLevelDrainCutoffConfig
+                            &amp;&amp; !isBeingKeptAwakeLocked(powerGroup)) &#123;
+                            //充电速度慢于消耗速度或者用户活动timeout已过则退出Dream进入睡眠
+                    &#125; else &#123;
+                        return; // continue dreaming 继续维持Dream状态
+                    &#125;
+                &#125;
+
+                // Dream has ended or will be stopped.  Update the power state.
+                // 退出Dreamland,进入休眠状态
+                if (isItBedTimeYetLocked(powerGroup)) &#123;
+                    if (isAttentiveTimeoutExpired(powerGroup, now)) &#123;
+                        //更新睡眠状态
+                        sleepPowerGroupLocked(powerGroup, now,
+                                PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, Process.SYSTEM_UID);
+                    &#125; else &#123;
+                        //更新doze状态
+                        dozePowerGroupLocked(powerGroup, now,
+                                PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, Process.SYSTEM_UID);
+                    &#125;
+                &#125; else &#123;
+                    // 唤醒设备
+                    wakePowerGroupLocked(powerGroup, now,
+                            PowerManager.WAKE_REASON_DREAM_FINISHED,
+                            &quot;android.server.power:DREAM_FINISHED&quot;, Process.SYSTEM_UID,
+                            mContext.getOpPackageName(), Process.SYSTEM_UID);
+                &#125;
+            &#125; else if (wakefulness == WAKEFULNESS_DOZING) &#123;
+                if (isDreaming) &#123;
+                    return; // continue dozing 继续保持doze状态
+                &#125;
+                
+                // Doze has ended or will be stopped.  Update the power state.
+                // 更新睡眠状态
+                sleepPowerGroupLocked(powerGroup, now,  PowerManager.GO_TO_SLEEP_REASON_TIMEOUT,
+                        Process.SYSTEM_UID);
+            &#125;
+        &#125;
+
+        // Stop dream.
+        if (isDreaming) &#123;
+            mDreamManager.stopDream(/* immediate= */ false);
+        &#125;
+    &#125;
+</code></pre>
+<p>在以上方法中，将会调用DreamManager处理具体的Dreamland逻辑，这部分流程的分析，在DreamManagerService模块分析时会进行详细分析。</p>
+<h4 id="2-11-finishWakefulnessChangeIfNeededLocked"><a href="#2-11-finishWakefulnessChangeIfNeededLocked" class="headerlink" title="2.11 finishWakefulnessChangeIfNeededLocked()"></a>2.11 finishWakefulnessChangeIfNeededLocked()</h4><p>该方法主要做唤醒状态发生变化后，后半部分更新工作：</p>
+<pre><code>//frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
+
+    @GuardedBy(&quot;mLock&quot;)
+    private void finishWakefulnessChangeIfNeededLocked() &#123;
+        if (mWakefulnessChanging &amp;&amp; areAllPowerGroupsReadyLocked()) &#123;
+            if (getGlobalWakefulnessLocked() == WAKEFULNESS_DOZING
+                    &amp;&amp; (mWakeLockSummary &amp; WAKE_LOCK_DOZE) == 0) &#123;
+                return; // wait until dream has enabled dozing
+            &#125; else &#123;
+                // Doze wakelock acquired (doze started) or device is no longer dozing.
+                mDozeStartInProgress = false;
+            &#125;Android采码蜂:
+            if (getGlobalWakefulnessLocked() == WAKEFULNESS_DOZING
+                    || getGlobalWakefulnessLocked() == WAKEFULNESS_ASLEEP) &#123;
+                logSleepTimeoutRecapturedLocked();
+            &#125;
+            mWakefulnessChanging = false;
+            mNotifier.onWakefulnessChangeFinished();
+        &#125;
+    &#125;
+</code></pre>
+<p>只有当屏幕状态改变后，才会执行该方法。进入该方法后，将通过Notifier#onWakefulnessChangeFinished()方法发送亮屏、灭屏广播等。</p>
+<blockquote>
+<p>该方法中的logScreenOn()方法将打印出整个亮屏流程的耗时，在平时处理问题时很有帮助。</p>
+</blockquote>
+<h4 id="2-12-updateSuspendBlockerLocked"><a href="#2-12-updateSuspendBlockerLocked" class="headerlink" title="2.12 updateSuspendBlockerLocked()"></a>2.12 updateSuspendBlockerLocked()</h4><p>这个方法用来更新SuspendBlocker锁状态。Suspend锁机制是Android框架中锁机的一种锁，它代表了框架层以上所有的WakeLock。Wakelock锁是APP或其他组建向PMS模块申请，而Suspend锁是PMS模块中对WakeLock锁的最终表现，或者说上层应用或system_server其他组件申请了wakelock锁后，在PMS中最终都会表现为Suspend锁，通过Suspend锁向Hal层写入节点，Kernal层会读取节点，从而唤醒或者休眠<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=CPU&spm=1001.2101.3001.7020">CPU</a>。<br>该方法的详细分析在PMS WakeLock机制中进行汇总。<br>到此为止，对PMS中所有核心方法进行了简单的分析，有些方法仅仅说明了下作用，会在后面具体业务中进行详细分析。</p>
+<p>跟着学习自： <a target="_blank" rel="noopener" href="https://juejin.cn/post/6946581970960793613">Android R PowerManagerService模块(1) 启动流程和核心方法</a></p>
+
+            </div>
+        
+        <footer class="article-footer">
+        </footer>
+    </div>
+</article>
+
+
+    
+<nav id="article-nav">
+   
+</nav>
+
+
+
+
+
+    
+    
+
+
+
+
+<!-- baidu url auto push script -->
+<script type="text/javascript">
+    !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=window.location.href,o=document.referrer;if(!e.test(r)){var n="//api.share.baidu.com/s.gif";o?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var t=new Image;t.src=n}}(window);
+</script>     
+</section>
+        </div>
+        <footer id="footer">
+    <div class="outer">
+       
+    </div>
+</footer>
+
+        
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>
